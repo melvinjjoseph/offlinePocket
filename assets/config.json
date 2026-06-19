@@ -1,0 +1,85 @@
+{
+  "security_idle_timeout_seconds": 30,
+  "clipboard_clear_timeout_seconds": 45,
+  "ocr_confidence_threshold": 0.75,
+  "max_custom_fields_per_card": 20,
+  "categories": [
+    {
+      "id": "creditCard",
+      "label": "Credit Card",
+      "icon": "credit_card",
+      "fields": [
+        { "name": "Card Number",     "type": "masked", "sensitive": true,  "regex": "^[0-9]{4}[\\s\\-]?[0-9]{4}[\\s\\-]?[0-9]{4}[\\s\\-]?[0-9]{4}$" },
+        { "name": "Cardholder Name", "type": "text",   "sensitive": false },
+        { "name": "Expiry Date",     "type": "date",   "sensitive": false, "regex": "^(0[1-9]|1[0-2])\\/[0-9]{2}$" },
+        { "name": "CVV",             "type": "masked", "sensitive": true,  "regex": "^[0-9]{3,4}$" }
+      ]
+    },
+    {
+      "id": "debitCard",
+      "label": "Debit Card",
+      "icon": "credit_card_outlined",
+      "fields": [
+        { "name": "Card Number",     "type": "masked", "sensitive": true,  "regex": "^[0-9]{4}[\\s\\-]?[0-9]{4}[\\s\\-]?[0-9]{4}[\\s\\-]?[0-9]{4}$" },
+        { "name": "Cardholder Name", "type": "text",   "sensitive": false },
+        { "name": "Expiry Date",     "type": "date",   "sensitive": false, "regex": "^(0[1-9]|1[0-2])\\/[0-9]{2}$" },
+        { "name": "CVV",             "type": "masked", "sensitive": true,  "regex": "^[0-9]{3,4}$" }
+      ]
+    },
+    {
+      "id": "prepaidCard",
+      "label": "Prepaid Card",
+      "icon": "card_giftcard_outlined",
+      "fields": [
+        { "name": "Card Number",     "type": "masked", "sensitive": true,  "regex": "^[0-9]{4}[\\s\\-]?[0-9]{4}[\\s\\-]?[0-9]{4}[\\s\\-]?[0-9]{4}$" },
+        { "name": "Cardholder Name", "type": "text",   "sensitive": false },
+        { "name": "Expiry Date",     "type": "date",   "sensitive": false, "regex": "^(0[1-9]|1[0-2])\\/[0-9]{2}$" },
+        { "name": "CVV",             "type": "masked", "sensitive": true,  "regex": "^[0-9]{3,4}$" }
+      ]
+    },
+    {
+      "id": "passport",
+      "label": "Passport",
+      "icon": "book_outlined",
+      "fields": [
+        { "name": "Passport Number", "type": "masked", "sensitive": true,  "regex": "^[A-Z][0-9]{7,8}$" },
+        { "name": "Full Name",       "type": "text",   "sensitive": false },
+        { "name": "Nationality",     "type": "text",   "sensitive": false, "regex": "^[A-Za-z ]{2,50}$" },
+        { "name": "Date of Birth",   "type": "date",   "sensitive": false, "regex": "^[0-9]{2}\\/[0-9]{2}\\/[0-9]{4}$" },
+        { "name": "Issue Date",      "type": "date",   "sensitive": false, "regex": "^[0-9]{2}\\/[0-9]{2}\\/[0-9]{4}$" },
+        { "name": "Expiry Date",     "type": "date",   "sensitive": false, "regex": "^[0-9]{2}\\/[0-9]{2}\\/[0-9]{4}$" }
+      ]
+    },
+    {
+      "id": "driverLicense",
+      "label": "Driver License",
+      "icon": "drive_eta_outlined",
+      "fields": [
+        { "name": "License Number",  "type": "masked", "sensitive": true,  "regex": "^[A-Z0-9]{5,20}$" },
+        { "name": "Full Name",       "type": "text",   "sensitive": false },
+        { "name": "Date of Birth",   "type": "date",   "sensitive": false, "regex": "^[0-9]{2}\\/[0-9]{2}\\/[0-9]{4}$" },
+        { "name": "Expiry Date",     "type": "date",   "sensitive": false, "regex": "^[0-9]{2}\\/[0-9]{2}\\/[0-9]{4}$" }
+      ]
+    },
+    {
+      "id": "nationalId",
+      "label": "National ID",
+      "icon": "badge_outlined",
+      "fields": [
+        { "name": "ID Number",       "type": "masked", "sensitive": true,  "regex": "^[A-Z0-9]{4,20}$" },
+        { "name": "Full Name",       "type": "text",   "sensitive": false },
+        { "name": "Date of Birth",   "type": "date",   "sensitive": false, "regex": "^[0-9]{2}\\/[0-9]{2}\\/[0-9]{4}$" },
+        { "name": "Expiry Date",     "type": "date",   "sensitive": false, "regex": "^[0-9]{2}\\/[0-9]{2}\\/[0-9]{4}$" }
+      ]
+    },
+    {
+      "id": "genericId",
+      "label": "Generic ID",
+      "icon": "card_membership_outlined",
+      "fields": [
+        { "name": "ID Number",       "type": "text",   "sensitive": true  },
+        { "name": "Full Name",       "type": "text",   "sensitive": false }
+      ]
+    }
+  ]
+}
