@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
+import '../../providers/auth_provider.dart';
 
-class AuthGate extends StatefulWidget {
+class AuthGate extends ConsumerStatefulWidget {
   const AuthGate({super.key});
 
   @override
-  State<AuthGate> createState() => _AuthGateState();
+  ConsumerState<AuthGate> createState() => _AuthGateState();
 }
 
-class _AuthGateState extends State<AuthGate> with WidgetsBindingObserver {
+class _AuthGateState extends ConsumerState<AuthGate> with WidgetsBindingObserver {
   final _auth = LocalAuthentication();
   bool _authenticating = false;
   bool _done = false;
@@ -18,9 +19,12 @@ class _AuthGateState extends State<AuthGate> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // Trigger on first launch via lifecycle — didChangeAppLifecycleState fires
-    // with resumed shortly after the activity window is ready, sidestepping the
-    // "Called after onSaveInstanceState" hang on MIUI.
+    // Trigger auth after first frame — handles both initial launch and
+    // re-display after auto-lock (where resumed already fired before this
+    // widget was built).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_done && !_authenticating) _authenticate();
+    });
   }
 
   @override
@@ -51,7 +55,8 @@ class _AuthGateState extends State<AuthGate> with WidgetsBindingObserver {
           );
       if (success && mounted) {
         _done = true;
-        context.go('/home');
+        ref.read(authStateProvider.notifier).state = true;
+        // Router redirect (authStateProvider → true → onAuth → /home) handles navigation.
       }
     } catch (_) {
       // Swallow — user taps Unlock to retry

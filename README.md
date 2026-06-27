@@ -70,6 +70,16 @@ A security-first, local-only digital wallet for Android. Store physical cards an
 - Toggle in the home screen top-right cycles through: System → Light → Dark
 - Preference is persisted across app restarts
 
+### Auto-lock
+- App locks and requires re-authentication after 5 minutes in the background
+- Timeout is configurable via `security_idle_timeout_seconds` in `assets/config.json`
+
+### Clipboard Auto-clear
+- Copying a sensitive field (card number, CVV, etc.) schedules an automatic clipboard clear
+- Clears after 45 seconds if you stay in the app, or when you return to OfflinePocket if you've been away longer
+- Non-sensitive fields copy normally with no timer
+- Timeout is configurable via `clipboard_clear_timeout_seconds` in `assets/config.json`
+
 ---
 
 ## Security Architecture
@@ -169,8 +179,6 @@ To sideload on Android:
 ## Roadmap
 
 - [ ] FLAG_SECURE — prevent screenshots and app switcher previews
-- [ ] Clipboard auto-clear after a configurable timeout
-- [ ] Auto-lock when the app is backgrounded beyond a timeout
 - [ ] Search and filter cards
 - [ ] Proper release keystore (currently signed with debug key — not Play Store ready)
 - [ ] iOS support
