@@ -1,9 +1,10 @@
-# ML Kit text recognition — only Latin script is bundled; suppress missing optional scripts
--dontwarn com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions$Builder
--dontwarn com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions
--dontwarn com.google.mlkit.vision.text.devanagari.DevanagariTextRecognizerOptions$Builder
--dontwarn com.google.mlkit.vision.text.devanagari.DevanagariTextRecognizerOptions
--dontwarn com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions$Builder
--dontwarn com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions
--dontwarn com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions$Builder
--dontwarn com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions
+# ML Kit — keep all classes so R8 doesn't shrink reflectively-loaded model internals
+-keep class com.google.mlkit.** { *; }
+-keep class com.google.android.gms.internal.mlkit_vision_text** { *; }
+-keep class com.google.android.gms.internal.mlkit_vision_text_latin** { *; }
+
+# Suppress warnings for optional non-Latin scripts (not bundled)
+-dontwarn com.google.mlkit.vision.text.chinese.**
+-dontwarn com.google.mlkit.vision.text.devanagari.**
+-dontwarn com.google.mlkit.vision.text.japanese.**
+-dontwarn com.google.mlkit.vision.text.korean.**

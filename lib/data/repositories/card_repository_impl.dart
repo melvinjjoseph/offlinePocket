@@ -68,6 +68,37 @@ class CardRepositoryImpl implements CardRepository {
   }
 
   @override
+  Future<void> update(CardEntry card) async {
+    final key = await _keyBytes;
+    await _db.cardsDao.upsertCard(CardEntriesTableCompanion.insert(
+      id: card.id,
+      category: card.category,
+      label: card.label,
+      createdAt: card.createdAt.millisecondsSinceEpoch,
+      frontImagePath: Value(card.frontImagePath),
+      backImagePath: Value(card.backImagePath),
+    ));
+    // Replace all fields — delete old rows first to avoid orphans from UUID changes.
+    await _db.cardsDao.deleteFieldsForCard(card.id);
+    for (var i = 0; i < card.fields.length; i++) {
+      final field = card.fields[i];
+      final encrypted = _crypto.encrypt(
+        Uint8List.fromList(utf8.encode(field.value)),
+        key,
+      );
+      await _db.cardsDao.upsertField(DocumentFieldsTableCompanion.insert(
+        id: _uuid.v4(),
+        cardId: card.id,
+        keyName: field.key,
+        encryptedValue: encrypted,
+        fieldType: field.type.name,
+        isSensitive: field.isSensitive,
+        sortOrder: i,
+      ));
+    }
+  }
+
+  @override
   Future<void> delete(String id) => _db.cardsDao.deleteCard(id);
 
   Future<CardEntry> _rowToEntry(CardRow row) async {

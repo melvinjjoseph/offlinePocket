@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -22,7 +24,10 @@ typedef _Field = ({
 });
 
 class AddCardScreen extends ConsumerStatefulWidget {
-  const AddCardScreen({super.key});
+  const AddCardScreen({super.key, this.initialCard});
+
+  /// When set, the screen operates in edit mode pre-populated from this card.
+  final CardEntry? initialCard;
 
   @override
   ConsumerState<AddCardScreen> createState() => _AddCardScreenState();
@@ -33,14 +38,39 @@ class _AddCardScreenState extends ConsumerState<AddCardScreen> {
   final _labelController = TextEditingController();
   String _category = 'creditCard';
   final List<_Field> _fields = [];
-  String? _frontImagePath;
-  String? _backImagePath;
+  String? _frontPath;
+  String? _backPath;
   List<String> _rawOcrLines = [];
+
+  bool _isEditing = false;
+  String? _cardId;
+  // Paths to delete from disk after a successful save (replaced / removed images).
+  final List<String> _pathsToDelete = [];
 
   @override
   void initState() {
     super.initState();
-    _populateDefaultFields(AppConfig.fallback);
+    final initial = widget.initialCard;
+    if (initial != null) {
+      _isEditing = true;
+      _cardId = initial.id;
+      _category = initial.category;
+      _labelController.text = initial.label;
+      _frontPath = initial.frontImagePath;
+      _backPath = initial.backImagePath;
+      for (final f in initial.fields) {
+        _fields.add((
+          key: TextEditingController(text: f.key),
+          value: TextEditingController(text: f.value),
+          sensitive: f.isSensitive,
+          readOnlyKey: false,
+          type: f.type,
+          regex: null,
+        ));
+      }
+    } else {
+      _populateDefaultFields(AppConfig.fallback);
+    }
   }
 
   void _populateDefaultFields(AppConfig config) {
@@ -83,8 +113,19 @@ class _AddCardScreenState extends ConsumerState<AddCardScreen> {
     if (result == null) return;
 
     setState(() {
-      _frontImagePath = result.frontImagePath;
-      _backImagePath = result.backImagePath;
+      // Schedule any paths being replaced for cleanup after save.
+      if (_frontPath != null && _frontPath != result.frontImagePath) {
+        _pathsToDelete.add(_frontPath!);
+      }
+      if (result.backImagePath != null &&
+          _backPath != null &&
+          _backPath != result.backImagePath) {
+        _pathsToDelete.add(_backPath!);
+      }
+
+      _frontPath = result.frontImagePath;
+      // In edit mode keep the existing back image if the user skipped re-scanning it.
+      _backPath = result.backImagePath ?? (_isEditing ? _backPath : null);
       _rawOcrLines = result.extraction.rawLines;
 
       for (final extracted in result.extraction.fields) {
@@ -104,6 +145,14 @@ class _AddCardScreenState extends ConsumerState<AddCardScreen> {
           ));
         }
       }
+    });
+  }
+
+  void _removeImage(String path) {
+    setState(() {
+      _pathsToDelete.add(path);
+      if (_frontPath == path) _frontPath = null;
+      if (_backPath == path) _backPath = null;
     });
   }
 
@@ -206,16 +255,27 @@ class _AddCardScreenState extends ConsumerState<AddCardScreen> {
         .toList();
 
     final card = CardEntry(
-      id: _uuid.v4(),
+      id: _isEditing ? _cardId! : _uuid.v4(),
       category: _category,
       label: _labelController.text.trim(),
       fields: fields,
-      createdAt: DateTime.now(),
-      frontImagePath: _frontImagePath,
-      backImagePath: _backImagePath,
+      createdAt: _isEditing ? widget.initialCard!.createdAt : DateTime.now(),
+      frontImagePath: _frontPath,
+      backImagePath: _backPath,
     );
 
-    await ref.read(cardsNotifierProvider.notifier).save(card);
+    if (_isEditing) {
+      await ref.read(cardsNotifierProvider.notifier).updateCard(card);
+    } else {
+      await ref.read(cardsNotifierProvider.notifier).save(card);
+    }
+
+    // Clean up replaced / removed image files after successful DB write.
+    for (final path in _pathsToDelete) {
+      final file = File(path);
+      if (await file.exists()) await file.delete();
+    }
+
     if (mounted) Navigator.of(context).pop();
   }
 
@@ -235,14 +295,13 @@ class _AddCardScreenState extends ConsumerState<AddCardScreen> {
         ref.watch(appConfigProvider).valueOrNull ?? AppConfig.fallback;
     final categories = config.categories;
 
-    // Ensure selected category exists in loaded config
     if (!categories.any((c) => c.id == _category)) {
       _category = categories.isNotEmpty ? categories.first.id : 'creditCard';
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Card'),
+        title: Text(_isEditing ? 'Edit Card' : 'Add Card'),
         actions: [TextButton(onPressed: _save, child: const Text('Save'))],
       ),
       body: Form(
@@ -254,15 +313,15 @@ class _AddCardScreenState extends ConsumerState<AddCardScreen> {
             OutlinedButton.icon(
               onPressed: _scan,
               icon: const Icon(Icons.document_scanner_outlined),
-              label: const Text('Scan Card'),
+              label: Text(_isEditing ? 'Re-scan Card' : 'Scan Card'),
             ),
             // ── Scanned images ───────────────────────────────────────────
-            if (_frontImagePath != null || _backImagePath != null) ...[
+            if (_frontPath != null || _backPath != null) ...[
               const SizedBox(height: 12),
               Builder(builder: (context) {
                 final pages = <(String, String)>[
-                  if (_frontImagePath != null) ('Front', _frontImagePath!),
-                  if (_backImagePath != null) ('Back', _backImagePath!),
+                  if (_frontPath != null) ('Front', _frontPath!),
+                  if (_backPath != null) ('Back', _backPath!),
                 ];
                 return Row(
                   children: [
@@ -272,6 +331,7 @@ class _AddCardScreenState extends ConsumerState<AddCardScreen> {
                         label: pages[i].$1,
                         path: pages[i].$2,
                         onTap: () => openFullscreenGallery(context, pages, i),
+                        onRemove: () => _removeImage(pages[i].$2),
                       ),
                     ],
                   ],
@@ -298,7 +358,12 @@ class _AddCardScreenState extends ConsumerState<AddCardScreen> {
               onChanged: (v) {
                 if (v == null) return;
                 setState(() => _category = v);
-                _populateDefaultFields(config);
+                // Only reset to defaults if the form is still pristine — no scan
+                // data and no manually entered values.
+                final hasData = _frontPath != null ||
+                    _backPath != null ||
+                    _fields.any((f) => f.value.text.isNotEmpty);
+                if (!_isEditing && !hasData) _populateDefaultFields(config);
               },
             ),
             const SizedBox(height: 12),
@@ -449,12 +514,17 @@ class _FieldRow extends StatelessWidget {
 }
 
 class _SideThumb extends StatelessWidget {
-  const _SideThumb(
-      {required this.label, required this.path, required this.onTap});
+  const _SideThumb({
+    required this.label,
+    required this.path,
+    required this.onTap,
+    required this.onRemove,
+  });
 
   final String label;
   final String path;
   final VoidCallback onTap;
+  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -462,16 +532,36 @@ class _SideThumb extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: EncryptedImage(
-                path: path,
-                height: 90,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: EncryptedImage(
+                    path: path,
+                    height: 90,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: GestureDetector(
+                    onTap: onRemove,
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      padding: const EdgeInsets.all(2),
+                      child: const Icon(Icons.close,
+                          color: Colors.white, size: 16),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 4),
             Text(label,

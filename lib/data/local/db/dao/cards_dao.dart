@@ -26,6 +26,9 @@ class CardsDao extends DatabaseAccessor<AppDatabase> with _$CardsDaoMixin {
   Future<void> upsertField(DocumentFieldsTableCompanion field) =>
       into(documentFieldsTable).insertOnConflictUpdate(field);
 
+  Future<void> deleteFieldsForCard(String cardId) =>
+      (delete(documentFieldsTable)..where((t) => t.cardId.equals(cardId))).go();
+
   Future<void> deleteCard(String id) async {
     await (delete(documentFieldsTable)..where((t) => t.cardId.equals(id))).go();
     await (delete(cardEntriesTable)..where((t) => t.id.equals(id))).go();
