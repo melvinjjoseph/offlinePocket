@@ -161,7 +161,7 @@ class CardDetailScreen extends ConsumerWidget {
               subtitle: const Text('Plain text with all field values'),
               onTap: () {
                 Navigator.pop(context);
-                _shareAsText(card, cat);
+                _confirmShareAsText(context, card, cat);
               },
             ),
             const SizedBox(height: 8),
@@ -198,6 +198,36 @@ class CardDetailScreen extends ConsumerWidget {
         if (await f.exists()) await f.delete();
       }
     }
+  }
+
+  Future<void> _confirmShareAsText(BuildContext context, CardEntry card, CategoryConfig? cat) async {
+    final hasSensitive = card.fields.any((f) => f.isSensitive);
+    if (!hasSensitive) {
+      _shareAsText(card, cat);
+      return;
+    }
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Share sensitive data?'),
+        content: const Text(
+          'This card contains sensitive fields (card numbers, CVV, ID numbers, etc.).\n\n'
+          'Sharing as text sends all values in plain text to whichever app you choose. '
+          'Once shared, OfflinePocket has no control over that data.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Share anyway'),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true) _shareAsText(card, cat);
   }
 
   Future<void> _shareAsText(CardEntry card, CategoryConfig? cat) async {

@@ -1,16 +1,20 @@
-import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/config/app_config.dart';
-import '../../core/config/remote_config_service.dart';
 import '../screens/auth/auth_gate.dart';
 import '../screens/home/home_screen.dart';
 import 'auth_provider.dart';
 
 final appConfigProvider = FutureProvider<AppConfig>((ref) async {
-  final service = RemoteConfigService(FirebaseRemoteConfig.instance);
-  return service.fetch();
+  try {
+    final raw = await rootBundle.loadString('assets/config.json');
+    return AppConfig.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+  } catch (_) {
+    return AppConfig.fallback;
+  }
 });
 
 class _RouterNotifier extends ChangeNotifier {

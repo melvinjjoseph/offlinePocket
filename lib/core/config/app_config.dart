@@ -75,7 +75,7 @@ class AppConfig {
 
   factory AppConfig.fromJson(Map<String, dynamic> json) => AppConfig(
         securityIdleTimeoutSeconds:
-            json['security_idle_timeout_seconds'] as int? ?? 30,
+            json['security_idle_timeout_seconds'] as int? ?? 300,
         clipboardClearTimeoutSeconds:
             json['clipboard_clear_timeout_seconds'] as int? ?? 45,
         ocrConfidenceThreshold:
@@ -90,7 +90,7 @@ class AppConfig {
       categories.where((c) => c.id == id).firstOrNull;
 
   static const AppConfig fallback = AppConfig(
-    securityIdleTimeoutSeconds: 30,
+    securityIdleTimeoutSeconds: 300,
     clipboardClearTimeoutSeconds: 45,
     ocrConfidenceThreshold: 0.75,
     maxCustomFieldsPerCard: 20,
