@@ -36,6 +36,12 @@ class CardsNotifier extends AsyncNotifier<List<CardEntry>> {
     ref.invalidateSelf();
   }
 
+  Future<void> updateCard(CardEntry card) async {
+    final repo = await ref.read(cardRepositoryProvider.future);
+    await repo.update(card);
+    ref.invalidateSelf();
+  }
+
   Future<void> delete(String id) async {
     final repo = await ref.read(cardRepositoryProvider.future);
     await repo.delete(id);

@@ -4,6 +4,7 @@ import '../../../core/config/app_config.dart';
 import '../../../domain/entities/card_entry.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/card_providers.dart';
+import '../../providers/theme_provider.dart';
 import 'add_card_screen.dart';
 import '../card_detail/card_detail_screen.dart';
 
@@ -16,7 +17,24 @@ class HomeScreen extends ConsumerWidget {
     final config = ref.watch(appConfigProvider).valueOrNull ?? AppConfig.fallback;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('OfflinePocket')),
+      appBar: AppBar(
+        title: const Text('OfflinePocket'),
+        actions: [
+          IconButton(
+            tooltip: switch (ref.watch(themeModeProvider)) {
+              ThemeMode.system => 'System theme',
+              ThemeMode.light => 'Light theme',
+              ThemeMode.dark => 'Dark theme',
+            },
+            icon: Icon(switch (ref.watch(themeModeProvider)) {
+              ThemeMode.system => Icons.brightness_auto_outlined,
+              ThemeMode.light => Icons.light_mode_outlined,
+              ThemeMode.dark => Icons.dark_mode_outlined,
+            }),
+            onPressed: () => ref.read(themeModeProvider.notifier).cycle(),
+          ),
+        ],
+      ),
       body: cardsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),

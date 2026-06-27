@@ -12,6 +12,7 @@ import '../../providers/card_providers.dart';
 import '../../widgets/encrypted_image.dart';
 import '../../widgets/masked_field.dart';
 import '../../widgets/fullscreen_gallery.dart';
+import '../home/add_card_screen.dart';
 
 class CardDetailScreen extends ConsumerWidget {
   final String cardId;
@@ -36,6 +37,13 @@ class CardDetailScreen extends ConsumerWidget {
           appBar: AppBar(
             title: Text(card.label),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.edit_outlined),
+                tooltip: 'Edit',
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => AddCardScreen(initialCard: card),
+                )),
+              ),
               IconButton(
                 icon: const Icon(Icons.share_outlined),
                 tooltip: 'Share',

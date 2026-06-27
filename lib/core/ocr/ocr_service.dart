@@ -8,7 +8,7 @@ class OcrService {
       final result = await recognizer.processImage(input);
       return result.text;
     } finally {
-      recognizer.close();
+      await recognizer.close();
     }
   }
 }
