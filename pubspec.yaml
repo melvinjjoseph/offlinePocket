@@ -1,5 +1,5 @@
-name: omnivault
-description: "Secure local-first digital wallet for physical cards and IDs."
+name: offline_pocket
+description: "Offline-first, encrypted digital wallet for physical cards and IDs."
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -10,15 +10,11 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Firebase
-  firebase_core: ^3.6.0
-  firebase_remote_config: ^5.1.0
-
   # State management
   flutter_riverpod: ^2.5.1
   riverpod_annotation: ^2.3.5
 
-  # Local database (encrypted SQLite via SQLCipher)
+  # Local database (SQLCipher-encrypted SQLite + field-level AES-256-GCM)
   drift: ^2.20.0
   drift_flutter: ^0.2.1
   sqlcipher_flutter_libs: ^0.7.0

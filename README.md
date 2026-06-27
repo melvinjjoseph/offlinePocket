@@ -1,6 +1,6 @@
 # OfflinePocket
 
-A security-first, local-only digital wallet for Android. Store physical cards and identity documents — credit cards, debit cards, passports, driving licences, national IDs — with on-device OCR scanning, AES-256-GCM encryption, and biometric access control. No cloud sync, no account required, no data ever leaves your device.
+A security-first, offline-only digital wallet for Android. Store physical cards and identity documents — credit cards, debit cards, passports, driving licences, national IDs — with on-device OCR scanning, AES-256-GCM encryption, and biometric access control. No cloud sync, no account required. All data stays on your device — no network connections are made by this app.
 
 ---
 
@@ -9,7 +9,7 @@ A security-first, local-only digital wallet for Android. Store physical cards an
 ### Biometric Authentication
 - Fingerprint or face unlock on every app launch
 - Re-prompts when the app returns to the foreground
-- No PIN fallback — biometric is mandatory
+- Device PIN, pattern, or password accepted as fallback when biometrics are unavailable
 
 ### Card & Document Storage
 - Store any physical card or ID document as a structured entry
@@ -62,13 +62,17 @@ A security-first, local-only digital wallet for Android. Store physical cards an
 - Share icon in the Card Detail screen AppBar
 - Bottom sheet offers two options:
   - **Share card image** — shares the actual scanned front/back photos via the system share sheet (only shown if images exist)
-  - **Share as text** — formats all field values as plain text with the category header and an OfflinePocket footer
+  - **Share as text** — formats all field values as plain text with the category header and an OfflinePocket footer; a confirmation dialog is shown when the card contains sensitive fields
 - Images are decrypted to temporary files, shared, then immediately deleted
+- Once data leaves OfflinePocket via the system share sheet, it is outside the app's encryption model
 
 ### Dark / Light / System Theme
 - Follows the phone's system dark/light setting by default
 - Toggle in the home screen top-right cycles through: System → Light → Dark
 - Preference is persisted across app restarts
+
+### Screen Protection
+- `FLAG_SECURE` is set on the app window — screenshots are blocked and the app appears blank in the Android task switcher, preventing credential exposure via screen capture or multitasking previews
 
 ### Auto-lock
 - App locks and requires re-authentication after 5 minutes in the background
@@ -86,12 +90,13 @@ A security-first, local-only digital wallet for Android. Store physical cards an
 
 | Layer | Mechanism |
 |---|---|
-| Access control | Android Biometric API via `local_auth` |
+| Access control | Android Biometric API via `local_auth` (PIN/pattern as fallback) |
 | Encryption algorithm | AES-256-GCM (authenticated encryption) |
 | Key storage | Android Keystore via `flutter_secure_storage` |
-| Database | Drift (SQLite) with field-level encryption — no SQLCipher dependency |
+| Database | SQLCipher (database-level encryption) + field-level AES-256-GCM |
 | Image storage | App private documents dir, AES-256-GCM encrypted |
 | OCR | On-device only via Google ML Kit, no network |
+| Network | None — no outbound connections, no telemetry |
 
 No plaintext field values are ever written to disk. The encryption key is hardware-backed via the Android Keystore and cannot be extracted from the device.
 
@@ -176,9 +181,14 @@ To sideload on Android:
 
 ---
 
+## Privacy Policy
+
+OfflinePocket collects no data. See [PRIVACY_POLICY.md](PRIVACY_POLICY.md) for the full policy.
+
+---
+
 ## Roadmap
 
-- [ ] FLAG_SECURE — prevent screenshots and app switcher previews
 - [ ] Search and filter cards
 - [ ] Proper release keystore (currently signed with debug key — not Play Store ready)
 - [ ] iOS support
