@@ -1,5 +1,5 @@
 {
-  "security_idle_timeout_seconds": 30,
+  "security_idle_timeout_seconds": 300,
   "clipboard_clear_timeout_seconds": 45,
   "ocr_confidence_threshold": 0.75,
   "max_custom_fields_per_card": 20,

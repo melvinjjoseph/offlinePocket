@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../core/services/clipboard_service.dart';
 
 class MaskedField extends StatefulWidget {
   final String label;
@@ -22,15 +23,31 @@ class _MaskedFieldState extends State<MaskedField> {
 
   String get _displayValue {
     if (!widget.isSensitive || _revealed) return widget.value;
-    // Strip separators to count raw digits
     final digits = widget.value.replaceAll(RegExp(r'[\s\-]'), '');
     if (digits.length >= 12) {
-      // Card-number style: •••• •••• •••• XXXX
       final last4 = digits.substring(digits.length - 4);
       return '•••• •••• •••• $last4';
     }
     if (widget.value.length <= 4) return '•' * widget.value.length;
     return '${'•' * (widget.value.length - 4)}${widget.value.substring(widget.value.length - 4)}';
+  }
+
+  void _copy() {
+    if (widget.isSensitive) {
+      ClipboardService.copySensitive(widget.value);
+    } else {
+      Clipboard.setData(ClipboardData(text: widget.value));
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          widget.isSensitive
+              ? '${widget.label} copied — auto-clears after ${ClipboardService.clearDelaySeconds} s'
+              : '${widget.label} copied',
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
@@ -68,15 +85,7 @@ class _MaskedFieldState extends State<MaskedField> {
             ),
           IconButton(
             icon: const Icon(Icons.copy, size: 18),
-            onPressed: () {
-              Clipboard.setData(ClipboardData(text: widget.value));
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${widget.label} copied'),
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-            },
+            onPressed: _copy,
             tooltip: 'Copy',
           ),
         ],
