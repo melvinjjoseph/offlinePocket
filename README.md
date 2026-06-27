@@ -172,7 +172,7 @@ flutter run --release
 
 ## Releases
 
-Pre-built APKs are available on the [Releases](https://github.com/melvinjjoseph/offlinePocket/releases) page.
+Pre-built APKs are available on the [Releases](https://github.com/melvinjjoseph/offlinePocket/releases) page. All releases from v2.0.0 onward are signed with a stable release keystore.
 
 To sideload on Android:
 1. Download the `.apk` file
@@ -190,5 +190,4 @@ OfflinePocket collects no data. See [PRIVACY_POLICY.md](PRIVACY_POLICY.md) for t
 ## Roadmap
 
 - [ ] Search and filter cards
-- [ ] Proper release keystore (currently signed with debug key — not Play Store ready)
 - [ ] iOS support
