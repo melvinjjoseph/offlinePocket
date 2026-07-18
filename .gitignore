@@ -49,5 +49,10 @@ android/key.properties
 *.jks
 *.keystore
 
+# Firebase remnants — never commit
+google-services.json
+firebase.json
+.firebaserc
+
 # Flutter plugins lockfile (machine-generated)
 .flutter-plugins

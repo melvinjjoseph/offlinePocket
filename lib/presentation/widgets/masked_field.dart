@@ -34,7 +34,8 @@ class _MaskedFieldState extends State<MaskedField> {
 
   void _copy() {
     if (widget.isSensitive) {
-      ClipboardService.copySensitive(widget.value);
+      final stripped = widget.value.replaceAll(RegExp(r'[\s\-]'), '');
+      ClipboardService.copySensitive(stripped);
     } else {
       Clipboard.setData(ClipboardData(text: widget.value));
     }

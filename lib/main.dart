@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/config/app_config.dart';
 import 'core/services/clipboard_service.dart';
 import 'presentation/providers/app_providers.dart';
@@ -9,7 +11,16 @@ import 'presentation/providers/theme_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ProviderScope(child: OfflinePocketApp()));
+  final prefs = await SharedPreferences.getInstance();
+  final packageInfo = await PackageInfo.fromPlatform();
+  final lastSeenVersion = prefs.getString('onboarding_last_version') ?? '';
+  final onboardingSeen = lastSeenVersion == packageInfo.version;
+  runApp(ProviderScope(
+    overrides: [
+      onboardingSeenProvider.overrideWith((_) => onboardingSeen),
+    ],
+    child: const OfflinePocketApp(),
+  ));
 }
 
 const _seed = Color(0xFF1565C0);
