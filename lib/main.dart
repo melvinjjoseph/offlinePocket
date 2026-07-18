@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,15 +11,29 @@ import 'presentation/providers/app_providers.dart';
 import 'presentation/providers/auth_provider.dart';
 import 'presentation/providers/theme_provider.dart';
 
+const _backupChannel = MethodChannel('com.melvinjjoseph.offlinepocket/backup');
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final prefs = await SharedPreferences.getInstance();
-  final packageInfo = await PackageInfo.fromPlatform();
+
+  final results = await Future.wait([
+    SharedPreferences.getInstance(),
+    PackageInfo.fromPlatform(),
+    _backupChannel.invokeMethod<Uint8List>('consumePendingBackup').catchError((_) => null),
+  ]);
+
+  final prefs = results[0] as SharedPreferences;
+  final packageInfo = results[1] as PackageInfo;
+  final pendingBackup = results[2] as Uint8List?;
+
   final lastSeenVersion = prefs.getString('onboarding_last_version') ?? '';
   final onboardingSeen = lastSeenVersion == packageInfo.version;
+
   runApp(ProviderScope(
     overrides: [
       onboardingSeenProvider.overrideWith((_) => onboardingSeen),
+      if (pendingBackup != null)
+        pendingBackupProvider.overrideWith((_) => List<int>.from(pendingBackup)),
     ],
     child: const OfflinePocketApp(),
   ));
@@ -35,6 +51,15 @@ class OfflinePocketApp extends ConsumerStatefulWidget {
 class _OfflinePocketAppState extends ConsumerState<OfflinePocketApp>
     with WidgetsBindingObserver {
   Timer? _lockTimer;
+
+  Future<void> _checkPendingBackup() async {
+    try {
+      final bytes = await _backupChannel.invokeMethod<Uint8List>('consumePendingBackup');
+      if (bytes != null && mounted) {
+        ref.read(pendingBackupProvider.notifier).state = List<int>.from(bytes);
+      }
+    } catch (_) {}
+  }
 
   @override
   void initState() {
@@ -62,6 +87,7 @@ class _OfflinePocketAppState extends ConsumerState<OfflinePocketApp>
       _lockTimer?.cancel();
       _lockTimer = null;
       ClipboardService.onResumed();
+      _checkPendingBackup();
     }
   }
 

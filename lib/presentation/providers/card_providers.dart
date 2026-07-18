@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/crypto/crypto_service.dart';
 import '../../core/keystore/keystore_service.dart';
+import '../../core/services/backup_service.dart';
 import '../../core/services/image_service.dart';
 import '../../data/local/db/app_database.dart';
 import '../../data/repositories/card_repository_impl.dart';
@@ -11,6 +12,8 @@ final cryptoServiceProvider = Provider<CryptoService>((ref) => CryptoService());
 final keystoreServiceProvider = Provider<KeystoreService>((ref) => KeystoreService());
 final imageServiceProvider = Provider<ImageService>((ref) =>
     ImageService(ref.read(cryptoServiceProvider), ref.read(keystoreServiceProvider)));
+final backupServiceProvider = Provider<BackupService>(
+    (ref) => BackupService(ref.read(cryptoServiceProvider)));
 
 final databaseProvider = Provider<AppDatabase>((ref) => AppDatabase.create());
 

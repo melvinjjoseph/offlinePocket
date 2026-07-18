@@ -6,6 +6,7 @@ import '../../providers/app_providers.dart';
 import '../../providers/card_providers.dart';
 import '../../providers/theme_provider.dart';
 import 'add_card_screen.dart';
+import '../backup/backup_screen.dart';
 import '../card_detail/card_detail_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -13,6 +14,19 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Auto-open BackupScreen when a .opbackup file is shared into the app
+    ref.listen<List<int>?>(pendingBackupProvider, (_, next) {
+      if (next != null && context.mounted) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const BackupScreen()),
+            );
+          }
+        });
+      }
+    });
+
     final cardsAsync = ref.watch(cardsNotifierProvider);
     final config = ref.watch(appConfigProvider).valueOrNull ?? AppConfig.fallback;
 
@@ -32,6 +46,27 @@ class HomeScreen extends ConsumerWidget {
               ThemeMode.dark => Icons.dark_mode_outlined,
             }),
             onPressed: () => ref.read(themeModeProvider.notifier).cycle(),
+          ),
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'backup') {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const BackupScreen()),
+                );
+              }
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(
+                value: 'backup',
+                child: Row(
+                  children: [
+                    Icon(Icons.shield_outlined),
+                    SizedBox(width: 12),
+                    Text('Backup & Restore'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

@@ -20,6 +20,8 @@ final appConfigProvider = FutureProvider<AppConfig>((ref) async {
 
 final onboardingSeenProvider = StateProvider<bool>((_) => false);
 
+final pendingBackupProvider = StateProvider<List<int>?>((_) => null);
+
 class _RouterNotifier extends ChangeNotifier {
   _RouterNotifier(Ref ref) {
     ref.listen(authStateProvider, (_, _) => notifyListeners());
