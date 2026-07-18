@@ -171,20 +171,23 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       final existingIds = (await repo.getAll()).map((c) => c.id).toSet();
       final notifier = ref.read(cardsNotifierProvider.notifier);
 
+      int added = 0;
+      int skipped = 0;
       for (final card in updatedCards) {
         if (existingIds.contains(card.id)) {
-          await notifier.updateCard(card);
+          skipped++;
         } else {
           await notifier.save(card);
+          added++;
         }
       }
 
       if (!mounted) return;
+      final msg = skipped == 0
+          ? 'Restored $added card${added == 1 ? '' : 's'}'
+          : 'Restored $added card${added == 1 ? '' : 's'} · $skipped already on device (skipped)';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              'Restored ${updatedCards.length} card${updatedCards.length == 1 ? '' : 's'}'),
-        ),
+        SnackBar(content: Text(msg)),
       );
       Navigator.of(context).pop();
     } catch (e) {
