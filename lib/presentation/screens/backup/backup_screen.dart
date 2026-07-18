@@ -1,14 +1,21 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
+import '../../../core/crypto/crypto_service.dart';
 import '../../../core/services/backup_service.dart';
 import '../../../domain/entities/card_entry.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/card_providers.dart';
+
+// Top-level so compute() can send it to a background isolate.
+// Runs PBKDF2 key derivation + AES-GCM decryption off the main thread.
+RestoredBackup _isolateRestore(({Uint8List bytes, String password}) args) =>
+    BackupService(CryptoService()).restore(args.bytes, args.password);
 
 class BackupScreen extends ConsumerStatefulWidget {
   const BackupScreen({super.key});
@@ -126,11 +133,41 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     if (password == null || !mounted) return;
 
     setState(() => _restoreLoading = true);
-    try {
-      final service = ref.read(backupServiceProvider);
-      final result = await Future(() => service.restore(bytes, password));
 
-      // Write and re-encrypt any images included in the backup.
+    // Show a full-screen blocking overlay — the decrypt + image re-encryption
+    // can take several seconds and the dialog makes the wait feel intentional.
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              const Text('Restoring backup…'),
+              const SizedBox(height: 4),
+              Text(
+                'Decrypting cards and images',
+                style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    try {
+      // PBKDF2 + AES-GCM runs in a background isolate so the spinner animates.
+      final result = await compute(
+        _isolateRestore,
+        (bytes: bytes, password: password),
+      );
+
       final imageService = ref.read(imageServiceProvider);
       final docsDir = await getApplicationDocumentsDirectory();
       final imagesDir = Directory('${docsDir.path}/card_images');
@@ -183,15 +220,18 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       }
 
       if (!mounted) return;
+      Navigator.of(context).pop(); // dismiss loading dialog
+
       final msg = skipped == 0
           ? 'Restored $added card${added == 1 ? '' : 's'}'
           : 'Restored $added card${added == 1 ? '' : 's'} · $skipped already on device (skipped)';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg)),
-      );
-      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+      Navigator.of(context).pop(); // pop BackupScreen
     } catch (e) {
-      if (mounted) _showError(e.toString());
+      if (mounted) {
+        Navigator.of(context).pop(); // dismiss loading dialog
+        _showError(e.toString());
+      }
     } finally {
       if (mounted) setState(() => _restoreLoading = false);
     }
