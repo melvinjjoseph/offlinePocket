@@ -94,6 +94,13 @@ A security-first, offline-only digital wallet for Android. Store physical cards 
 - Re-appears after every app update so new features can be highlighted
 - Skip button available on all slides; Get Started on the last
 
+### Search
+- Search icon in the home screen AppBar opens an inline search bar with autofocus
+- Matches against card label, category name, and field key names
+- Results shown as a flat list while typing; grouped view restores when query is cleared
+- Back button or system back gesture closes search without navigating away
+- Empty-state illustration shown when no cards match the query
+
 ### Backup & Restore
 - Export an encrypted `.opbackup` file containing all cards and scanned images
 - Password-based encryption: AES-256-GCM with a PBKDF2-SHA256 derived key (100,000 iterations, 16-byte random salt)
@@ -102,6 +109,7 @@ A security-first, offline-only digital wallet for Android. Store physical cards 
 - Restore by opening the `.opbackup` file from Drive or any file manager — OfflinePocket is registered as the handler and opens the restore flow automatically
 - Cards already on the device (matched by ID) are skipped; only new cards are imported
 - Scanned images are included in the backup, decrypted on export and re-encrypted with the new device's keystore key on restore
+- PBKDF2 key derivation and AES-GCM decryption run in a background isolate during restore — a full-screen loading dialog is shown so the UI remains responsive
 
 ---
 

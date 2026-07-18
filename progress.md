@@ -29,6 +29,19 @@ Encrypted `.opbackup` export/import.
 
 **Why file_picker was dropped:** `file_picker`'s AAR was compiled against SDK 34; `flutter_plugin_android_lifecycle` requires `compileSdk 36` in AGP 9. No supported workaround exists. Android intent filter covers the import side without needing a file picker.
 
+### Restore duplicate handling
+Cards are matched by UUID on restore. Cards already present on the device are skipped rather than overwritten — the backup is likely older than the current device state. The result snackbar reports how many cards were added vs skipped.
+
+UUID was kept as the identity key rather than switching to a content-based key (card number hash, etc.) because: not all card types have a card number; card numbers change on expiry/replacement; hashing content means any edit creates a new identity and causes duplicates on the next restore. The edge case (manually re-entering the same card on a new device before restoring) is rare enough that the simplicity of UUID identity is the right trade-off.
+
+### Restore loading dialog + background isolate
+PBKDF2 with 100K iterations runs on the main thread and blocks the UI entirely — the spinner couldn't even animate. Fixed by moving the `BackupService.restore()` call into a background isolate via `compute()`. `CryptoService` is stateless (pure PointyCastle, no Android Keystore) so it can be constructed fresh inside the isolate.
+
+The small `CircularProgressIndicator` inside the Restore card section was also not prominent enough. Replaced with a non-dismissible `AlertDialog` overlay that appears immediately after the password is confirmed and stays until the restore completes or fails.
+
+### Search
+Inline search in the home screen AppBar. Tap the search icon → AppBar title becomes a `TextField` with autofocus. Results filter as you type against card label, category name, and field key names (not field values, to avoid displaying sensitive data in the list). Matching cards are shown as a flat list; the grouped view returns when the query is empty. Back button/gesture closes search without navigating away (`PopScope` with `canPop: !_isSearching`).
+
 ### Cold-start intent bug fix
 Opening a `.opbackup` from Drive left the user on the home screen without triggering the restore flow.
 
