@@ -215,6 +215,6 @@ OfflinePocket collects no data. See [PRIVACY_POLICY.md](PRIVACY_POLICY.md) for t
 
 ## Roadmap
 
-- [ ] Search and filter cards
+- [x] Search and filter cards
 - [ ] iOS support
 - [ ] iCloud / Google Drive auto-backup

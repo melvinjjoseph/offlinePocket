@@ -18,13 +18,20 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _backupNavigating = false;
+  bool _isSearching = false;
+  String _searchQuery = '';
+  final _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // Check for a pending backup on the first frame — handles cold-start intents
-    // where the provider was already set before this widget was built.
     WidgetsBinding.instance.addPostFrameCallback((_) => _maybeOpenBackup());
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _maybeOpenBackup() {
@@ -36,9 +43,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         .then((_) => _backupNavigating = false);
   }
 
+  void _stopSearch() {
+    setState(() {
+      _isSearching = false;
+      _searchQuery = '';
+      _searchController.clear();
+    });
+  }
+
+  List<CardEntry> _applySearch(List<CardEntry> cards, AppConfig config) {
+    if (_searchQuery.isEmpty) return cards;
+    final q = _searchQuery.toLowerCase();
+    return cards.where((card) {
+      if (card.label.toLowerCase().contains(q)) return true;
+      final cat = config.categoryById(card.category);
+      if (cat != null && cat.label.toLowerCase().contains(q)) return true;
+      return card.fields.any((f) => f.key.toLowerCase().contains(q));
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Also react to changes while the app is already running (onNewIntent path).
     ref.listen<List<int>?>(pendingBackupProvider, (_, next) {
       if (next != null) _maybeOpenBackup();
     });
@@ -47,102 +72,165 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final config = ref.watch(appConfigProvider).valueOrNull ?? AppConfig.fallback;
     final themeMode = ref.watch(themeModeProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('OfflinePocket'),
-        actions: [
-          IconButton(
-            tooltip: switch (themeMode) {
-              ThemeMode.system => 'System theme',
-              ThemeMode.light => 'Light theme',
-              ThemeMode.dark => 'Dark theme',
-            },
-            icon: Icon(switch (themeMode) {
-              ThemeMode.system => Icons.brightness_auto_outlined,
-              ThemeMode.light => Icons.light_mode_outlined,
-              ThemeMode.dark => Icons.dark_mode_outlined,
-            }),
-            onPressed: () => ref.read(themeModeProvider.notifier).cycle(),
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'backup') {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const BackupScreen()),
-                );
-              }
-            },
-            itemBuilder: (_) => const [
-              PopupMenuItem(
-                value: 'backup',
-                child: Row(
-                  children: [
-                    Icon(Icons.shield_outlined),
-                    SizedBox(width: 12),
-                    Text('Backup & Restore'),
-                  ],
-                ),
+    return PopScope(
+      canPop: !_isSearching,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _stopSearch();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: _isSearching
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: _stopSearch,
+                )
+              : null,
+          title: _isSearching
+              ? TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    hintText: 'Search cards…',
+                    border: InputBorder.none,
+                  ),
+                  onChanged: (v) => setState(() => _searchQuery = v),
+                )
+              : const Text('OfflinePocket'),
+          actions: [
+            if (!_isSearching) ...[
+              IconButton(
+                icon: const Icon(Icons.search),
+                tooltip: 'Search',
+                onPressed: () => setState(() => _isSearching = true),
               ),
-            ],
-          ),
-        ],
-      ),
-      body: cardsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
-        data: (cards) {
-          if (cards.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.credit_card_off,
-                      size: 64,
-                      color: Theme.of(context).colorScheme.outline),
-                  const SizedBox(height: 16),
-                  const Text('No cards yet'),
-                  const SizedBox(height: 8),
-                  const Text('Tap + to add your first card'),
+              IconButton(
+                tooltip: switch (themeMode) {
+                  ThemeMode.system => 'System theme',
+                  ThemeMode.light => 'Light theme',
+                  ThemeMode.dark => 'Dark theme',
+                },
+                icon: Icon(switch (themeMode) {
+                  ThemeMode.system => Icons.brightness_auto_outlined,
+                  ThemeMode.light => Icons.light_mode_outlined,
+                  ThemeMode.dark => Icons.dark_mode_outlined,
+                }),
+                onPressed: () => ref.read(themeModeProvider.notifier).cycle(),
+              ),
+              PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'backup') {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const BackupScreen()),
+                    );
+                  }
+                },
+                itemBuilder: (_) => const [
+                  PopupMenuItem(
+                    value: 'backup',
+                    child: Row(
+                      children: [
+                        Icon(Icons.shield_outlined),
+                        SizedBox(width: 12),
+                        Text('Backup & Restore'),
+                      ],
+                    ),
+                  ),
                 ],
               ),
-            );
-          }
-
-          // Group by category, preserving config order
-          final grouped = <CategoryConfig, List<CardEntry>>{};
-          for (final cat in config.categories) {
-            final group = cards.where((c) => c.category == cat.id).toList();
-            if (group.isNotEmpty) grouped[cat] = group;
-          }
-          // Cards whose category isn't in current config go under a catch-all
-          final knownIds = config.categories.map((c) => c.id).toSet();
-          final orphans = cards.where((c) => !knownIds.contains(c.category)).toList();
-
-          return ListView(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            children: [
-              for (final entry in grouped.entries) ...[
-                _CategoryHeader(cat: entry.key, count: entry.value.length),
-                for (final card in entry.value)
-                  _CardTile(card: card, config: config),
-                const SizedBox(height: 8),
-              ],
-              if (orphans.isNotEmpty) ...[
-                _OrphanHeader(count: orphans.length),
-                for (final card in orphans)
-                  _CardTile(card: card, config: config),
-                const SizedBox(height: 8),
-              ],
             ],
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const AddCardScreen()),
+            if (_isSearching)
+              IconButton(
+                icon: const Icon(Icons.close),
+                tooltip: 'Clear',
+                onPressed: () => setState(() {
+                  _searchQuery = '';
+                  _searchController.clear();
+                }),
+              ),
+          ],
         ),
-        icon: const Icon(Icons.add),
-        label: const Text('Add Card'),
+        body: cardsAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(child: Text('Error: $e')),
+          data: (cards) {
+            if (cards.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.credit_card_off,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.outline),
+                    const SizedBox(height: 16),
+                    const Text('No cards yet'),
+                    const SizedBox(height: 8),
+                    const Text('Tap + to add your first card'),
+                  ],
+                ),
+              );
+            }
+
+            if (_searchQuery.isNotEmpty) {
+              final results = _applySearch(cards, config);
+              if (results.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.search_off,
+                          size: 64,
+                          color: Theme.of(context).colorScheme.outline),
+                      const SizedBox(height: 16),
+                      Text('No results for "$_searchQuery"'),
+                    ],
+                  ),
+                );
+              }
+              return ListView(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                children: [
+                  for (final card in results)
+                    _CardTile(card: card, config: config),
+                ],
+              );
+            }
+
+            // Grouped view when not searching
+            final grouped = <CategoryConfig, List<CardEntry>>{};
+            for (final cat in config.categories) {
+              final group = cards.where((c) => c.category == cat.id).toList();
+              if (group.isNotEmpty) grouped[cat] = group;
+            }
+            final knownIds = config.categories.map((c) => c.id).toSet();
+            final orphans =
+                cards.where((c) => !knownIds.contains(c.category)).toList();
+
+            return ListView(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              children: [
+                for (final entry in grouped.entries) ...[
+                  _CategoryHeader(cat: entry.key, count: entry.value.length),
+                  for (final card in entry.value)
+                    _CardTile(card: card, config: config),
+                  const SizedBox(height: 8),
+                ],
+                if (orphans.isNotEmpty) ...[
+                  _OrphanHeader(count: orphans.length),
+                  for (final card in orphans)
+                    _CardTile(card: card, config: config),
+                  const SizedBox(height: 8),
+                ],
+              ],
+            );
+          },
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const AddCardScreen()),
+          ),
+          icon: const Icon(Icons.add),
+          label: const Text('Add Card'),
+        ),
       ),
     );
   }
