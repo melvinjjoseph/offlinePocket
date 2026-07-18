@@ -15,9 +15,11 @@ class MainActivity : FlutterFragmentActivity() {
     private var pendingBackupBytes: ByteArray? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Read the intent BEFORE super.onCreate() so the bytes are stored
+        // before Flutter's main() calls consumePendingBackup via the channel.
+        readBackupIntent(intent)
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
-        readBackupIntent(intent)
     }
 
     override fun onNewIntent(intent: Intent) {

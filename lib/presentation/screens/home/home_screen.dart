@@ -9,38 +9,55 @@ import 'add_card_screen.dart';
 import '../backup/backup_screen.dart';
 import '../card_detail/card_detail_screen.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Auto-open BackupScreen when a .opbackup file is shared into the app
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  bool _backupNavigating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Check for a pending backup on the first frame — handles cold-start intents
+    // where the provider was already set before this widget was built.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeOpenBackup());
+  }
+
+  void _maybeOpenBackup() {
+    if (_backupNavigating || !mounted) return;
+    if (ref.read(pendingBackupProvider) == null) return;
+    _backupNavigating = true;
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const BackupScreen()))
+        .then((_) => _backupNavigating = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Also react to changes while the app is already running (onNewIntent path).
     ref.listen<List<int>?>(pendingBackupProvider, (_, next) {
-      if (next != null && context.mounted) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (context.mounted) {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const BackupScreen()),
-            );
-          }
-        });
-      }
+      if (next != null) _maybeOpenBackup();
     });
 
     final cardsAsync = ref.watch(cardsNotifierProvider);
     final config = ref.watch(appConfigProvider).valueOrNull ?? AppConfig.fallback;
+    final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('OfflinePocket'),
         actions: [
           IconButton(
-            tooltip: switch (ref.watch(themeModeProvider)) {
+            tooltip: switch (themeMode) {
               ThemeMode.system => 'System theme',
               ThemeMode.light => 'Light theme',
               ThemeMode.dark => 'Dark theme',
             },
-            icon: Icon(switch (ref.watch(themeModeProvider)) {
+            icon: Icon(switch (themeMode) {
               ThemeMode.system => Icons.brightness_auto_outlined,
               ThemeMode.light => Icons.light_mode_outlined,
               ThemeMode.dark => Icons.dark_mode_outlined,
