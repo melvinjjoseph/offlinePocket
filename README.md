@@ -84,6 +84,25 @@ A security-first, offline-only digital wallet for Android. Store physical cards 
 - Non-sensitive fields copy normally with no timer
 - Timeout is configurable via `clipboard_clear_timeout_seconds` in `assets/config.json`
 
+### Clipboard Paste Compatibility
+- Card numbers are stripped of spaces and dashes before being written to the clipboard
+- Ensures correct pasting into payment forms that enforce a digit-only maxlength
+
+### Onboarding Carousel
+- Shown once per app version after first authentication
+- 4 slides covering core features: storage, scanning, security, and backup
+- Re-appears after every app update so new features can be highlighted
+- Skip button available on all slides; Get Started on the last
+
+### Backup & Restore
+- Export an encrypted `.opbackup` file containing all cards and scanned images
+- Password-based encryption: AES-256-GCM with a PBKDF2-SHA256 derived key (100,000 iterations, 16-byte random salt)
+- The file is opaque without the password — card numbers cannot be read from the file alone
+- Share the file to Google Drive, email, or any storage app via the system share sheet
+- Restore by opening the `.opbackup` file from Drive or any file manager — OfflinePocket is registered as the handler and opens the restore flow automatically
+- Cards already on the device (matched by ID) are skipped; only new cards are imported
+- Scanned images are included in the backup, decrypted on export and re-encrypted with the new device's keystore key on restore
+
 ---
 
 ## Security Architecture
@@ -95,10 +114,13 @@ A security-first, offline-only digital wallet for Android. Store physical cards 
 | Key storage | Android Keystore via `flutter_secure_storage` |
 | Database | SQLCipher (database-level encryption) + field-level AES-256-GCM |
 | Image storage | App private documents dir, AES-256-GCM encrypted |
+| Backup encryption | AES-256-GCM + PBKDF2-SHA256 (100K iterations, 16-byte salt) |
 | OCR | On-device only via Google ML Kit, no network |
 | Network | None — no outbound connections, no telemetry |
 
 No plaintext field values are ever written to disk. The encryption key is hardware-backed via the Android Keystore and cannot be extracted from the device.
+
+Backup files are self-contained and portable. Images are decrypted from the device keystore during export and re-encrypted with the destination device's keystore key on restore. Without the backup password, the `.opbackup` file is opaque ciphertext.
 
 ---
 
@@ -110,11 +132,13 @@ No plaintext field values are ever written to disk. The encryption key is hardwa
 | Dart | 3.12.2 |
 | State management | Riverpod 2.x (AsyncNotifier pattern) |
 | Database | Drift + SQLite |
-| Encryption | PointyCastle (AES-256-GCM) |
+| Encryption | PointyCastle (AES-256-GCM, PBKDF2) |
 | Key storage | flutter_secure_storage (Android Keystore) |
 | OCR | google_mlkit_text_recognition |
 | Camera | camera plugin |
 | Navigation | go_router |
+| Sharing | share_plus |
+| App version | package_info_plus |
 
 ---
 
@@ -127,7 +151,7 @@ lib/
     crypto/         # AES-256-GCM encrypt/decrypt
     keystore/       # Android Keystore key management
     ocr/            # OcrService (ML Kit), FieldExtractor
-    services/       # ImageService (encrypt, decrypt, session cache)
+    services/       # ImageService, BackupService, ClipboardService
   data/
     local/db/       # Drift database, tables, DAOs
     repositories/   # CardRepositoryImpl
@@ -142,6 +166,8 @@ lib/
       home/         # HomeScreen, AddCardScreen (also used for edit)
       card_detail/  # CardDetailScreen
       scanner/      # CardScannerScreen
+      onboarding/   # OnboardingScreen (per-version carousel)
+      backup/       # BackupScreen (export & restore)
     widgets/        # MaskedField, EncryptedImage, FullscreenGallery
 ```
 
@@ -191,3 +217,4 @@ OfflinePocket collects no data. See [PRIVACY_POLICY.md](PRIVACY_POLICY.md) for t
 
 - [ ] Search and filter cards
 - [ ] iOS support
+- [ ] iCloud / Google Drive auto-backup
