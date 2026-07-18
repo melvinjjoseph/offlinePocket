@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:drift/drift.dart' show Value;
+import 'package:pointycastle/export.dart' show InvalidCipherTextException;
 import 'package:uuid/uuid.dart';
 import '../../core/crypto/crypto_service.dart';
 import '../../core/keystore/keystore_service.dart';
@@ -26,8 +27,17 @@ class CardRepositoryImpl implements CardRepository {
 
   @override
   Future<List<CardEntry>> getAll() async {
-    final rows = await _db.cardsDao.getAllCards();
-    return Future.wait(rows.map(_rowToEntry));
+    try {
+      final rows = await _db.cardsDao.getAllCards();
+      return await Future.wait(rows.map(_rowToEntry));
+    } on InvalidCipherTextException {
+      // Key mismatch — stale encrypted rows from a previous install whose
+      // Keystore key no longer exists. Wipe storage and database so the app
+      // starts clean rather than staying in a permanent error state.
+      await _keystore.deleteKey();
+      await _db.cardsDao.deleteAllCards();
+      return [];
+    }
   }
 
   @override

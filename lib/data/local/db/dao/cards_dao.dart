@@ -33,4 +33,9 @@ class CardsDao extends DatabaseAccessor<AppDatabase> with _$CardsDaoMixin {
     await (delete(documentFieldsTable)..where((t) => t.cardId.equals(id))).go();
     await (delete(cardEntriesTable)..where((t) => t.id.equals(id))).go();
   }
+
+  Future<void> deleteAllCards() async {
+    await delete(documentFieldsTable).go();
+    await delete(cardEntriesTable).go();
+  }
 }

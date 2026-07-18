@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class KeystoreService {
@@ -15,20 +16,28 @@ class KeystoreService {
         );
 
   Future<String> getOrCreateKey() async {
-    final existing = await _storage.read(key: _keyAlias);
-    if (existing != null) return existing;
+    try {
+      final existing = await _storage.read(key: _keyAlias);
+      if (existing != null) return existing;
+    } catch (_) {
+      // The EncryptedSharedPreferences backing key was deleted (e.g. the app
+      // was uninstalled and reinstalled) but stale ciphertext survived in the
+      // SharedPreferences XML on some Android versions/OEMs. Wipe it so we
+      // can write a fresh key without hitting the same error again.
+      await _storage.deleteAll();
+    }
     final key = _generateKey();
     await _storage.write(key: _keyAlias, value: key);
     return key;
   }
 
   Future<void> deleteKey() async {
-    await _storage.delete(key: _keyAlias);
+    await _storage.deleteAll();
   }
 
   String _generateKey() {
-    // 32 random bytes encoded as hex — generated once, stored in Keystore
-    final bytes = List<int>.generate(32, (_) => DateTime.now().microsecondsSinceEpoch & 0xFF);
+    final rng = Random.secure();
+    final bytes = List<int>.generate(32, (_) => rng.nextInt(256));
     return bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
   }
 }
