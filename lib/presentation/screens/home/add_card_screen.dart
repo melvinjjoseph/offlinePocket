@@ -208,20 +208,28 @@ class _AddCardScreenState extends ConsumerState<AddCardScreen> {
   }
 
   Future<void> _pickDate(_Field f) async {
-    final isMonthYear = f.key.text.toLowerCase().contains('expiry');
+    // MM/YY format (card expiry) has a 2-digit year in its regex; full dates have 4-digit.
+    final isMonthYear = f.regex != null
+        ? !f.regex!.contains('{4}')
+        : f.key.text.toLowerCase().contains('expiry');
+
     if (isMonthYear) {
       final now = DateTime.now();
-      final picked = await showDatePicker(
+      int month = now.month;
+      int year = now.year;
+      final existing = f.value.text;
+      if (existing.length >= 5 && existing[2] == '/') {
+        month = int.tryParse(existing.substring(0, 2)) ?? month;
+        final yy = int.tryParse(existing.substring(3));
+        if (yy != null) year = 2000 + yy;
+      }
+      final result = await showDialog<(int, int)>(
         context: context,
-        initialDate: now,
-        firstDate: now,
-        lastDate: DateTime(now.year + 20),
-        helpText: 'Select expiry month',
-        fieldLabelText: 'Expiry',
+        builder: (_) => _MonthYearPickerDialog(initialMonth: month, initialYear: year),
       );
-      if (picked != null) {
+      if (result != null && mounted) {
         f.value.text =
-            '${picked.month.toString().padLeft(2, '0')}/${picked.year.toString().substring(2)}';
+            '${result.$1.toString().padLeft(2, '0')}/${(result.$2 % 100).toString().padLeft(2, '0')}';
         setState(() {});
       }
     } else {
@@ -231,7 +239,7 @@ class _AddCardScreenState extends ConsumerState<AddCardScreen> {
         firstDate: DateTime(1900),
         lastDate: DateTime.now().add(const Duration(days: 365 * 30)),
       );
-      if (picked != null) {
+      if (picked != null && mounted) {
         f.value.text =
             '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
         setState(() {});
@@ -454,6 +462,13 @@ class _FieldRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDate = field.type == FieldType.date;
+    final regex = field.regex;
+    final isNumeric = !isDate &&
+        (field.type == FieldType.number ||
+            (regex != null &&
+                !regex.contains('A-Z') &&
+                !regex.contains('a-z') &&
+                regex.contains('0-9')));
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -489,6 +504,11 @@ class _FieldRow extends StatelessWidget {
               readOnly: isDate,
               maxLines: 2,
               minLines: 1,
+              keyboardType: isDate
+                  ? TextInputType.none
+                  : isNumeric
+                      ? TextInputType.number
+                      : TextInputType.text,
               onTap: isDate ? onPickDate : null,
               validator: _validate,
               autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -570,6 +590,85 @@ class _SideThumb extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _MonthYearPickerDialog extends StatefulWidget {
+  const _MonthYearPickerDialog({
+    required this.initialMonth,
+    required this.initialYear,
+  });
+
+  final int initialMonth;
+  final int initialYear;
+
+  @override
+  State<_MonthYearPickerDialog> createState() => _MonthYearPickerDialogState();
+}
+
+class _MonthYearPickerDialogState extends State<_MonthYearPickerDialog> {
+  late int _month;
+  late int _year;
+
+  static const _monthLabels = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _month = widget.initialMonth;
+    _year = widget.initialYear;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final years = List.generate(21, (i) => now.year + i);
+
+    return AlertDialog(
+      title: const Text('Expiry Date'),
+      content: Row(
+        children: [
+          Expanded(
+            child: DropdownButton<int>(
+              value: _month,
+              isExpanded: true,
+              items: List.generate(
+                12,
+                (i) => DropdownMenuItem(
+                  value: i + 1,
+                  child: Text(_monthLabels[i]),
+                ),
+              ),
+              onChanged: (v) => setState(() => _month = v!),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: DropdownButton<int>(
+              value: _year,
+              isExpanded: true,
+              items: years
+                  .map((y) => DropdownMenuItem(value: y, child: Text('$y')))
+                  .toList(),
+              onChanged: (v) => setState(() => _year = v!),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, (_month, _year)),
+          child: const Text('OK'),
+        ),
+      ],
     );
   }
 }
