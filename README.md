@@ -17,7 +17,8 @@ A security-first, offline-only digital wallet for Android. Store physical cards 
 - Sensitive fields (card numbers, PAN, etc.) are masked by default with a reveal toggle
 - Fields are validated against per-category patterns (e.g. card number format, expiry date)
 - Custom fields can be added freely to any card
-- Date fields show a calendar picker; expiry dates use MM/YY format
+- Date fields show a calendar picker; expiry dates (MM/YY) use a compact month + year picker — no day selection
+- Card Number and CVV fields show the numeric keypad automatically
 
 ### Supported Categories
 

@@ -4,6 +4,18 @@ Tracks features built, bugs fixed, and decisions made across versions.
 
 ---
 
+## v2.1.2 / v2.1.3
+
+### Expiry date: month + year picker
+Card expiry fields on Credit, Debit, and Prepaid cards now open a compact dialog with separate month and year dropdowns instead of the full calendar. The full calendar (with day selection) is still used for date-of-birth and issue/expiry dates on passports, licences, and national IDs — those use DD/MM/YYYY and need the day. Detection is based on the field's regex: a 2-digit year pattern (`[0-9]{2}$` without `{4}`) routes to the month/year picker; all other date fields keep the calendar.
+
+### Numeric keyboard for Card Number and CVV
+Card Number and CVV fields bring up the numeric keypad on both the Add Card and Edit Card screens. Detection is regex-based: any field whose regex allows only digits (no `[A-Z]` or `[a-z]`) gets `TextInputType.number`. This correctly targets Card Number and CVV while leaving Passport Number and Licence Number (which start with a letter) on the full keyboard.
+
+The edit-mode fix (v2.1.3): in edit mode, fields were loaded with `regex: null` because the stored card data doesn't carry the config regex. Fixed by looking up the matching `FieldConfig` from `AppConfig` (by category + field name) in `initState` and using its regex.
+
+---
+
 ## Post-v2.0.0 (unreleased)
 
 ### Clipboard paste compatibility
