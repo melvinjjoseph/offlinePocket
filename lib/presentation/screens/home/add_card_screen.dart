@@ -58,14 +58,19 @@ class _AddCardScreenState extends ConsumerState<AddCardScreen> {
       _labelController.text = initial.label;
       _frontPath = initial.frontImagePath;
       _backPath = initial.backImagePath;
+      final config = ref.read(appConfigProvider).valueOrNull ?? AppConfig.fallback;
+      final catFields = config.categoryById(initial.category)?.fields ?? [];
       for (final f in initial.fields) {
+        final configField = catFields.where(
+          (fc) => fc.name.toLowerCase() == f.key.toLowerCase(),
+        ).firstOrNull;
         _fields.add((
           key: TextEditingController(text: f.key),
           value: TextEditingController(text: f.value),
           sensitive: f.isSensitive,
           readOnlyKey: false,
           type: f.type,
-          regex: null,
+          regex: configField?.regex,
         ));
       }
     } else {
