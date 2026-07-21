@@ -1,15 +1,15 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'core/config/app_config.dart';
 import 'core/services/clipboard_service.dart';
 import 'presentation/providers/app_providers.dart';
 import 'presentation/providers/auth_provider.dart';
+import 'presentation/providers/settings_provider.dart';
 import 'presentation/providers/theme_provider.dart';
+import 'presentation/theme/app_theme.dart';
 
 const _backupChannel = MethodChannel('com.melvinjjoseph.offlinepocket/backup');
 
@@ -38,8 +38,6 @@ Future<void> main() async {
     child: const OfflinePocketApp(),
   ));
 }
-
-const _seed = Color(0xFF1565C0);
 
 class OfflinePocketApp extends ConsumerStatefulWidget {
   const OfflinePocketApp({super.key});
@@ -77,8 +75,8 @@ class _OfflinePocketAppState extends ConsumerState<OfflinePocketApp>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
-      final config = ref.read(appConfigProvider).valueOrNull ?? AppConfig.fallback;
-      final lockTimeout = Duration(seconds: config.securityIdleTimeoutSeconds);
+      final lockTimeout =
+          Duration(seconds: ref.read(settingsProvider).autoLockSeconds);
       _lockTimer?.cancel();
       _lockTimer = Timer(lockTimeout, () {
         ref.read(authStateProvider.notifier).state = false;
@@ -93,31 +91,19 @@ class _OfflinePocketAppState extends ConsumerState<OfflinePocketApp>
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(appConfigProvider, (_, next) {
-      if (next.hasValue) {
-        ClipboardService.configure(next.value!.clipboardClearTimeoutSeconds);
-      }
+    ref.listen(settingsProvider, (_, next) {
+      ClipboardService.configure(next.clipboardClearSeconds);
     });
+    // Apply the initial value immediately (listen only fires on change).
+    ClipboardService.configure(ref.read(settingsProvider).clipboardClearSeconds);
     final router = ref.watch(routerProvider);
     final themeMode = ref.watch(themeModeProvider);
     return MaterialApp.router(
       title: 'OfflinePocket',
       debugShowCheckedModeBanner: false,
       themeMode: themeMode,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: _seed,
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: _seed,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
       routerConfig: router,
     );
   }

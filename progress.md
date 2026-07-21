@@ -4,6 +4,58 @@ Tracks features built, bugs fixed, and decisions made across versions.
 
 ---
 
+## v3.0.0 — Redesign
+
+### Visual system
+Full reskin to a dark, neon-cyan design (originating from a Google Stitch mockup, kept in `Design/`). `lib/presentation/theme/app_theme.dart` is now the single source of truth: the exact palette from the mockup's tokens, plus a derived teal light variant so the Dark/Light/System toggle still works.
+
+Material has no slot for the design's glow/panel-border/accent tokens, so those live in a `NeonTheme` `ThemeExtension`, read via `context.neon`. Screens never hardcode colors.
+
+`Geist` (sans) and `JetBrains Mono` (labels) are bundled as asset fonts in `assets/fonts/`. They are **not** fetched from Google Fonts at runtime — the app makes no network calls, so webfonts were never an option.
+
+### Navigation restructure
+The single home screen was replaced by `MainShell`, a bottom-nav shell with **Vault / Activity / Settings**. The former `home_screen.dart` was deleted.
+
+The 7 config categories are folded into 3 browsing buckets on the dashboard (`vault_buckets.dart`): Payment (credit/debit/prepaid), Government (national ID/licence/generic), Travel (passport). Cards in unrecognised categories still surface under "Other" so nothing can be hidden by the grouping.
+
+### Card detail
+Rebuilt around a gradient hero card plus per-field panels with individual reveal/copy. Short fields (expiry, CVV) pair into two-column rows.
+
+Two layout bugs found on-device and fixed:
+- The secure-clipboard footer filled the entire screen. `Scaffold.bottomNavigationBar` passes a full-height max constraint, and the inner `Column` defaulted to `MainAxisSize.max`, so it greedily consumed all of it. Fixed with `MainAxisSize.min`.
+- Paired compact fields (expiry/CVV) rendered as nothing. `CrossAxisAlignment.stretch` requires a bounded height, and inside a `ListView` the height is unbounded — in release builds this fails silently instead of asserting. Fixed by wrapping the row in `IntrinsicHeight`.
+
+### User-configurable security timeouts
+Auto-lock and clipboard-clear timeouts are now set in Settings and persisted (`settings_provider.dart`). `config.json` supplies the defaults; user choices override them. Stored in `SharedPreferences` alongside theme/onboarding — these are non-sensitive preferences, so they don't belong in the encrypted card database.
+
+### Purge All Data
+Irreversible wipe, behind a type-`PURGE`-to-confirm dialog that spells out what is destroyed and explicitly notes that already-exported backups are **not** affected and stay readable with their original password.
+
+`purgeAll()` deletes the database rows **first**, so no row can ever reference a file that failed to delete; then removes the `card_images` directory; then drops the Keystore key, which renders any residual ciphertext undecryptable.
+
+**Why not "Rotate Master Keys"** (also in the mockup): rejected. The key never leaves the device, so rotation doesn't evict an attacker who already extracted it; AES-GCM nonce limits are ~9 orders of magnitude away at this scale; and crucially it would not protect the one thing users would reach for it to protect — a leaked `.opbackup`, which is encrypted with a separate PBKDF2 key derived from the backup password. A full re-encryption pass also risks partial failure, and `getAll()` wipes the database on `InvalidCipherTextException`, so a botched rotation could destroy the vault.
+
+### Honest hardware reporting
+The settings panel previously hardcoded "StrongBox / Secure Enclave Active". It now queries `PackageManager.FEATURE_STRONGBOX_KEYSTORE` over a platform channel and reports what the device actually says. An unverified security claim is worse than none.
+
+### Activity log
+Local-only audit trail (`activity_events` table, schema v3 → v4).
+
+Events are grouped by category, with **egress** ranked highest — sharing is the only action that moves data outside the app's encryption boundary, so it is the most audit-worthy thing the app does. Logged: share as text, share image, backup export (all egress), plus unlock, failed unlock, backup restore, purge.
+
+Design decisions:
+- Stores `cardId` as a **reference**, never the label. Labels resolve at render time, so a deleted card degrades to "a deleted card" rather than leaking the name of something erased.
+- Never logs field values, clipboard contents, or backup passwords.
+- All three share paths check `ShareResult.status` and log **only on success** — a share the user backs out of is never recorded as a leak. Destination comes from `result.raw`, parsed past generic package segments so `com.instagram.android` reads "Instagram" rather than "android".
+- Retention: 30-day age cutoff, then a 500-event cap, pruned on insert.
+- `purgeAll()` clears the log too, then records a single purge event — the purge is recorded, but nothing about the vault's contents survives it.
+- Disableable via a Settings toggle; `local_auth` returns a plain bool, so a dismissed prompt and a rejected biometric are indistinguishable and the entry is worded neutrally rather than implying an intrusion.
+
+### Versioning fix
+`pubspec.yaml` had never moved off `1.0.0+1` — releases were tagged but the installed app always reported 1.0.0. Now `3.0.0+2`.
+
+---
+
 ## v2.1.2 / v2.1.3
 
 ### Expiry date: month + year picker

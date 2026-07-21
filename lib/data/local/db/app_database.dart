@@ -1,17 +1,22 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'tables/activity_events_table.dart';
 import 'tables/card_entries_table.dart';
 import 'tables/document_fields_table.dart';
+import 'dao/activity_dao.dart';
 import 'dao/cards_dao.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [CardEntriesTable, DocumentFieldsTable], daos: [CardsDao])
+@DriftDatabase(
+  tables: [CardEntriesTable, DocumentFieldsTable, ActivityEventsTable],
+  daos: [CardsDao, ActivityDao],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -28,6 +33,9 @@ class AppDatabase extends _$AppDatabase {
             await customStatement(
               "UPDATE card_entries SET category = 'creditCard' WHERE category = 'paymentCard'",
             );
+          }
+          if (from < 4) {
+            await migrator.createTable(activityEventsTable);
           }
         },
       );

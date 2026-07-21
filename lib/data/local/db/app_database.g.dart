@@ -912,6 +912,420 @@ class DocumentFieldsTableCompanion extends UpdateCompanion<FieldRow> {
   }
 }
 
+class $ActivityEventsTableTable extends ActivityEventsTable
+    with TableInfo<$ActivityEventsTableTable, ActivityRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ActivityEventsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+    'type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _timestampMeta = const VerificationMeta(
+    'timestamp',
+  );
+  @override
+  late final GeneratedColumn<int> timestamp = GeneratedColumn<int>(
+    'timestamp',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _cardIdMeta = const VerificationMeta('cardId');
+  @override
+  late final GeneratedColumn<String> cardId = GeneratedColumn<String>(
+    'card_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sensitiveMeta = const VerificationMeta(
+    'sensitive',
+  );
+  @override
+  late final GeneratedColumn<bool> sensitive = GeneratedColumn<bool>(
+    'sensitive',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("sensitive" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _targetMeta = const VerificationMeta('target');
+  @override
+  late final GeneratedColumn<String> target = GeneratedColumn<String>(
+    'target',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    type,
+    timestamp,
+    cardId,
+    sensitive,
+    target,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'activity_events';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ActivityRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(
+        _timestampMeta,
+        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_timestampMeta);
+    }
+    if (data.containsKey('card_id')) {
+      context.handle(
+        _cardIdMeta,
+        cardId.isAcceptableOrUnknown(data['card_id']!, _cardIdMeta),
+      );
+    }
+    if (data.containsKey('sensitive')) {
+      context.handle(
+        _sensitiveMeta,
+        sensitive.isAcceptableOrUnknown(data['sensitive']!, _sensitiveMeta),
+      );
+    }
+    if (data.containsKey('target')) {
+      context.handle(
+        _targetMeta,
+        target.isAcceptableOrUnknown(data['target']!, _targetMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ActivityRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ActivityRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}timestamp'],
+      )!,
+      cardId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}card_id'],
+      ),
+      sensitive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}sensitive'],
+      )!,
+      target: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target'],
+      ),
+    );
+  }
+
+  @override
+  $ActivityEventsTableTable createAlias(String alias) {
+    return $ActivityEventsTableTable(attachedDatabase, alias);
+  }
+}
+
+class ActivityRow extends DataClass implements Insertable<ActivityRow> {
+  final String id;
+  final String type;
+  final int timestamp;
+
+  /// Reference to the card involved, if any. Deliberately not the label —
+  /// the label is resolved at render time so deleted cards degrade gracefully.
+  final String? cardId;
+
+  /// True when the event moved sensitive values outside the app.
+  final bool sensitive;
+
+  /// Best-effort share destination (e.g. package name). Null when unknown.
+  final String? target;
+  const ActivityRow({
+    required this.id,
+    required this.type,
+    required this.timestamp,
+    this.cardId,
+    required this.sensitive,
+    this.target,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['type'] = Variable<String>(type);
+    map['timestamp'] = Variable<int>(timestamp);
+    if (!nullToAbsent || cardId != null) {
+      map['card_id'] = Variable<String>(cardId);
+    }
+    map['sensitive'] = Variable<bool>(sensitive);
+    if (!nullToAbsent || target != null) {
+      map['target'] = Variable<String>(target);
+    }
+    return map;
+  }
+
+  ActivityEventsTableCompanion toCompanion(bool nullToAbsent) {
+    return ActivityEventsTableCompanion(
+      id: Value(id),
+      type: Value(type),
+      timestamp: Value(timestamp),
+      cardId: cardId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cardId),
+      sensitive: Value(sensitive),
+      target: target == null && nullToAbsent
+          ? const Value.absent()
+          : Value(target),
+    );
+  }
+
+  factory ActivityRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ActivityRow(
+      id: serializer.fromJson<String>(json['id']),
+      type: serializer.fromJson<String>(json['type']),
+      timestamp: serializer.fromJson<int>(json['timestamp']),
+      cardId: serializer.fromJson<String?>(json['cardId']),
+      sensitive: serializer.fromJson<bool>(json['sensitive']),
+      target: serializer.fromJson<String?>(json['target']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'type': serializer.toJson<String>(type),
+      'timestamp': serializer.toJson<int>(timestamp),
+      'cardId': serializer.toJson<String?>(cardId),
+      'sensitive': serializer.toJson<bool>(sensitive),
+      'target': serializer.toJson<String?>(target),
+    };
+  }
+
+  ActivityRow copyWith({
+    String? id,
+    String? type,
+    int? timestamp,
+    Value<String?> cardId = const Value.absent(),
+    bool? sensitive,
+    Value<String?> target = const Value.absent(),
+  }) => ActivityRow(
+    id: id ?? this.id,
+    type: type ?? this.type,
+    timestamp: timestamp ?? this.timestamp,
+    cardId: cardId.present ? cardId.value : this.cardId,
+    sensitive: sensitive ?? this.sensitive,
+    target: target.present ? target.value : this.target,
+  );
+  ActivityRow copyWithCompanion(ActivityEventsTableCompanion data) {
+    return ActivityRow(
+      id: data.id.present ? data.id.value : this.id,
+      type: data.type.present ? data.type.value : this.type,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+      cardId: data.cardId.present ? data.cardId.value : this.cardId,
+      sensitive: data.sensitive.present ? data.sensitive.value : this.sensitive,
+      target: data.target.present ? data.target.value : this.target,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ActivityRow(')
+          ..write('id: $id, ')
+          ..write('type: $type, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('cardId: $cardId, ')
+          ..write('sensitive: $sensitive, ')
+          ..write('target: $target')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, type, timestamp, cardId, sensitive, target);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ActivityRow &&
+          other.id == this.id &&
+          other.type == this.type &&
+          other.timestamp == this.timestamp &&
+          other.cardId == this.cardId &&
+          other.sensitive == this.sensitive &&
+          other.target == this.target);
+}
+
+class ActivityEventsTableCompanion extends UpdateCompanion<ActivityRow> {
+  final Value<String> id;
+  final Value<String> type;
+  final Value<int> timestamp;
+  final Value<String?> cardId;
+  final Value<bool> sensitive;
+  final Value<String?> target;
+  final Value<int> rowid;
+  const ActivityEventsTableCompanion({
+    this.id = const Value.absent(),
+    this.type = const Value.absent(),
+    this.timestamp = const Value.absent(),
+    this.cardId = const Value.absent(),
+    this.sensitive = const Value.absent(),
+    this.target = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ActivityEventsTableCompanion.insert({
+    required String id,
+    required String type,
+    required int timestamp,
+    this.cardId = const Value.absent(),
+    this.sensitive = const Value.absent(),
+    this.target = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       type = Value(type),
+       timestamp = Value(timestamp);
+  static Insertable<ActivityRow> custom({
+    Expression<String>? id,
+    Expression<String>? type,
+    Expression<int>? timestamp,
+    Expression<String>? cardId,
+    Expression<bool>? sensitive,
+    Expression<String>? target,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (type != null) 'type': type,
+      if (timestamp != null) 'timestamp': timestamp,
+      if (cardId != null) 'card_id': cardId,
+      if (sensitive != null) 'sensitive': sensitive,
+      if (target != null) 'target': target,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ActivityEventsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? type,
+    Value<int>? timestamp,
+    Value<String?>? cardId,
+    Value<bool>? sensitive,
+    Value<String?>? target,
+    Value<int>? rowid,
+  }) {
+    return ActivityEventsTableCompanion(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      timestamp: timestamp ?? this.timestamp,
+      cardId: cardId ?? this.cardId,
+      sensitive: sensitive ?? this.sensitive,
+      target: target ?? this.target,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<int>(timestamp.value);
+    }
+    if (cardId.present) {
+      map['card_id'] = Variable<String>(cardId.value);
+    }
+    if (sensitive.present) {
+      map['sensitive'] = Variable<bool>(sensitive.value);
+    }
+    if (target.present) {
+      map['target'] = Variable<String>(target.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ActivityEventsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('type: $type, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('cardId: $cardId, ')
+          ..write('sensitive: $sensitive, ')
+          ..write('target: $target, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -920,7 +1334,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $DocumentFieldsTableTable documentFieldsTable =
       $DocumentFieldsTableTable(this);
+  late final $ActivityEventsTableTable activityEventsTable =
+      $ActivityEventsTableTable(this);
   late final CardsDao cardsDao = CardsDao(this as AppDatabase);
+  late final ActivityDao activityDao = ActivityDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -928,6 +1345,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     cardEntriesTable,
     documentFieldsTable,
+    activityEventsTable,
   ];
 }
 
@@ -1403,6 +1821,237 @@ typedef $$DocumentFieldsTableTableProcessedTableManager =
       FieldRow,
       PrefetchHooks Function()
     >;
+typedef $$ActivityEventsTableTableCreateCompanionBuilder =
+    ActivityEventsTableCompanion Function({
+      required String id,
+      required String type,
+      required int timestamp,
+      Value<String?> cardId,
+      Value<bool> sensitive,
+      Value<String?> target,
+      Value<int> rowid,
+    });
+typedef $$ActivityEventsTableTableUpdateCompanionBuilder =
+    ActivityEventsTableCompanion Function({
+      Value<String> id,
+      Value<String> type,
+      Value<int> timestamp,
+      Value<String?> cardId,
+      Value<bool> sensitive,
+      Value<String?> target,
+      Value<int> rowid,
+    });
+
+class $$ActivityEventsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ActivityEventsTableTable> {
+  $$ActivityEventsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get cardId => $composableBuilder(
+    column: $table.cardId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get sensitive => $composableBuilder(
+    column: $table.sensitive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get target => $composableBuilder(
+    column: $table.target,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ActivityEventsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ActivityEventsTableTable> {
+  $$ActivityEventsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get cardId => $composableBuilder(
+    column: $table.cardId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get sensitive => $composableBuilder(
+    column: $table.sensitive,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get target => $composableBuilder(
+    column: $table.target,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ActivityEventsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ActivityEventsTableTable> {
+  $$ActivityEventsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<int> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
+
+  GeneratedColumn<String> get cardId =>
+      $composableBuilder(column: $table.cardId, builder: (column) => column);
+
+  GeneratedColumn<bool> get sensitive =>
+      $composableBuilder(column: $table.sensitive, builder: (column) => column);
+
+  GeneratedColumn<String> get target =>
+      $composableBuilder(column: $table.target, builder: (column) => column);
+}
+
+class $$ActivityEventsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ActivityEventsTableTable,
+          ActivityRow,
+          $$ActivityEventsTableTableFilterComposer,
+          $$ActivityEventsTableTableOrderingComposer,
+          $$ActivityEventsTableTableAnnotationComposer,
+          $$ActivityEventsTableTableCreateCompanionBuilder,
+          $$ActivityEventsTableTableUpdateCompanionBuilder,
+          (
+            ActivityRow,
+            BaseReferences<
+              _$AppDatabase,
+              $ActivityEventsTableTable,
+              ActivityRow
+            >,
+          ),
+          ActivityRow,
+          PrefetchHooks Function()
+        > {
+  $$ActivityEventsTableTableTableManager(
+    _$AppDatabase db,
+    $ActivityEventsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ActivityEventsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ActivityEventsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ActivityEventsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<int> timestamp = const Value.absent(),
+                Value<String?> cardId = const Value.absent(),
+                Value<bool> sensitive = const Value.absent(),
+                Value<String?> target = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ActivityEventsTableCompanion(
+                id: id,
+                type: type,
+                timestamp: timestamp,
+                cardId: cardId,
+                sensitive: sensitive,
+                target: target,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String type,
+                required int timestamp,
+                Value<String?> cardId = const Value.absent(),
+                Value<bool> sensitive = const Value.absent(),
+                Value<String?> target = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ActivityEventsTableCompanion.insert(
+                id: id,
+                type: type,
+                timestamp: timestamp,
+                cardId: cardId,
+                sensitive: sensitive,
+                target: target,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ActivityEventsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ActivityEventsTableTable,
+      ActivityRow,
+      $$ActivityEventsTableTableFilterComposer,
+      $$ActivityEventsTableTableOrderingComposer,
+      $$ActivityEventsTableTableAnnotationComposer,
+      $$ActivityEventsTableTableCreateCompanionBuilder,
+      $$ActivityEventsTableTableUpdateCompanionBuilder,
+      (
+        ActivityRow,
+        BaseReferences<_$AppDatabase, $ActivityEventsTableTable, ActivityRow>,
+      ),
+      ActivityRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1411,4 +2060,6 @@ class $AppDatabaseManager {
       $$CardEntriesTableTableTableManager(_db, _db.cardEntriesTable);
   $$DocumentFieldsTableTableTableManager get documentFieldsTable =>
       $$DocumentFieldsTableTableTableManager(_db, _db.documentFieldsTable);
+  $$ActivityEventsTableTableTableManager get activityEventsTable =>
+      $$ActivityEventsTableTableTableManager(_db, _db.activityEventsTable);
 }

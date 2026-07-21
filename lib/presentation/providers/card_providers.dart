@@ -50,6 +50,13 @@ class CardsNotifier extends AsyncNotifier<List<CardEntry>> {
     await repo.delete(id);
     ref.invalidateSelf();
   }
+
+  /// Irreversible: removes all cards, scanned images, and the encryption key.
+  Future<void> purgeAll() async {
+    final repo = await ref.read(cardRepositoryProvider.future);
+    await repo.purgeAll();
+    ref.invalidateSelf();
+  }
 }
 
 final cardsNotifierProvider =

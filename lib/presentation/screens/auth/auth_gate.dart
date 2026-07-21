@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
+import '../../../domain/entities/activity_event.dart';
+import '../../providers/activity_providers.dart';
 import '../../providers/auth_provider.dart';
 
 class AuthGate extends ConsumerStatefulWidget {
@@ -43,6 +45,7 @@ class _AuthGateState extends ConsumerState<AuthGate> with WidgetsBindingObserver
   Future<void> _authenticate() async {
     if (_authenticating || _done) return;
     setState(() => _authenticating = true);
+    var timedOut = false;
     try {
       final success = await _auth
           .authenticate(
@@ -51,12 +54,21 @@ class _AuthGateState extends ConsumerState<AuthGate> with WidgetsBindingObserver
           )
           .timeout(
             const Duration(seconds: 8),
-            onTimeout: () => false,
+            onTimeout: () {
+              timedOut = true;
+              return false;
+            },
           );
+      final logger = ref.read(activityLoggerProvider);
       if (success && mounted) {
         _done = true;
+        await logger.log(ActivityType.vaultUnlocked);
         ref.read(authStateProvider.notifier).state = true;
         // Router redirect (authStateProvider → true → onAuth → /home) handles navigation.
+      } else if (!success && !timedOut) {
+        // Covers both a rejected biometric and a user-dismissed prompt —
+        // local_auth's bool API can't distinguish them.
+        await logger.log(ActivityType.authFailed);
       }
     } catch (_) {
       // Swallow — user taps Unlock to retry

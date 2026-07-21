@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:drift/drift.dart' show Value;
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:pointycastle/export.dart' show InvalidCipherTextException;
 import 'package:uuid/uuid.dart';
 import '../../core/crypto/crypto_service.dart';
@@ -110,6 +113,29 @@ class CardRepositoryImpl implements CardRepository {
 
   @override
   Future<void> delete(String id) => _db.cardsDao.deleteCard(id);
+
+  @override
+  Future<void> purgeAll() async {
+    // Order matters: wipe the database first so no row can ever reference a
+    // file we failed to delete. Image cleanup and key deletion are then
+    // best-effort — neither should leave the vault in a half-purged state.
+    await _db.cardsDao.deleteAllCards();
+    // The activity trail names what was in the vault — it must not survive.
+    await _db.activityDao.clearAll();
+
+    try {
+      final docs = await getApplicationDocumentsDirectory();
+      final dir = Directory(p.join(docs.path, 'card_images'));
+      if (await dir.exists()) await dir.delete(recursive: true);
+    } catch (_) {
+      // Best-effort: files left behind are unreadable once the key is gone.
+    }
+
+    // Dropping the key renders any residual ciphertext undecryptable.
+    try {
+      await _keystore.deleteKey();
+    } catch (_) {}
+  }
 
   Future<CardEntry> _rowToEntry(CardRow row) async {
     final key = await _keyBytes;

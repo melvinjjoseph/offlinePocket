@@ -10,6 +10,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../core/ocr/field_extractor.dart';
 import '../../../core/ocr/ocr_service.dart';
 import '../../providers/card_providers.dart';
+import '../../theme/app_theme.dart';
 
 /// Returned to AddCardScreen after both sides are captured + OCR'd.
 class ScanResult {
@@ -31,7 +32,8 @@ class CardScannerScreen extends ConsumerStatefulWidget {
   ConsumerState<CardScannerScreen> createState() => _CardScannerScreenState();
 }
 
-class _CardScannerScreenState extends ConsumerState<CardScannerScreen> {
+class _CardScannerScreenState extends ConsumerState<CardScannerScreen>
+    with SingleTickerProviderStateMixin {
   CameraController? _ctrl;
   int _side = 0; // 0 = front, 1 = back
   String? _frontPath;
@@ -40,15 +42,20 @@ class _CardScannerScreenState extends ConsumerState<CardScannerScreen> {
   bool _capturing = false;
   bool _processing = false;
   String? _error;
+  late final AnimationController _scanCtrl;
 
   @override
   void initState() {
     super.initState();
+    _scanCtrl =
+        AnimationController(vsync: this, duration: const Duration(milliseconds: 2200))
+          ..repeat(reverse: true);
     _initCamera();
   }
 
   @override
   void dispose() {
+    _scanCtrl.dispose();
     _ctrl?.dispose();
     super.dispose();
   }
@@ -152,12 +159,22 @@ class _CardScannerScreenState extends ConsumerState<CardScannerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final neon = context.neon;
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: Text(_side == 0 ? 'Scan Front' : 'Scan Back'),
+        title: Row(
+          children: [
+            Text('OfflinePocket ',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: neon.accent, fontWeight: FontWeight.w700)),
+            Text('Scanner',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Colors.white, fontWeight: FontWeight.w700)),
+          ],
+        ),
         actions: [
           if (_side == 1)
             TextButton(
@@ -181,58 +198,101 @@ class _CardScannerScreenState extends ConsumerState<CardScannerScreen> {
 
   Widget _buildCamera() {
     if (!_cameraReady || _ctrl == null) {
-      return const Center(
-          child: CircularProgressIndicator(color: Colors.white));
+      return Center(
+          child: CircularProgressIndicator(color: context.neon.accent));
     }
+    final neon = context.neon;
     return Stack(
       fit: StackFit.expand,
       children: [
         CameraPreview(_ctrl!),
-        // Card-shaped guide overlay
+        // Neon card-shaped guide with corner brackets + scan line
         Center(
-          child: Container(
-            width: 300,
-            height: 190,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.white70, width: 2),
-              borderRadius: BorderRadius.circular(12),
+          child: SizedBox(
+            width: 320,
+            height: 200,
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: CustomPaint(painter: _ScanFramePainter(neon.accent)),
+                ),
+                AnimatedBuilder(
+                  animation: _scanCtrl,
+                  builder: (context, _) => Positioned(
+                    left: 8,
+                    right: 8,
+                    top: 8 + (200 - 16) * _scanCtrl.value,
+                    child: Container(
+                      height: 2,
+                      decoration: BoxDecoration(
+                        color: neon.accent,
+                        boxShadow: [
+                          BoxShadow(color: neon.accent, blurRadius: 8),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
         Positioned(
-          bottom: 16,
-          left: 0,
-          right: 0,
+          bottom: 24,
+          left: 20,
+          right: 20,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 _side == 0
-                    ? 'Position the FRONT of the card inside the frame'
-                    : 'Position the BACK of the card inside the frame',
-                style: const TextStyle(color: Colors.white70, fontSize: 13),
+                    ? 'ALIGN THE FRONT OF THE CARD WITHIN THE FRAME'
+                    : 'ALIGN THE BACK OF THE CARD WITHIN THE FRAME',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Colors.white54),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 20),
-              GestureDetector(
-                onTap: _capturing ? null : _capture,
-                child: Container(
-                  width: 68,
-                  height: 68,
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: DecoratedBox(
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 3),
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: neon.glowShadow(),
                   ),
-                  child: Center(
-                    child: _capturing
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : Container(
-                            width: 52,
-                            height: 52,
-                            decoration: const BoxDecoration(
-                                shape: BoxShape.circle, color: Colors.white),
-                          ),
+                  child: FilledButton.icon(
+                    onPressed: _capturing ? null : _capture,
+                    icon: _capturing
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Icon(Icons.document_scanner_outlined),
+                    label: Text(_capturing ? 'Capturing…' : 'Scan Card'),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
                   ),
                 ),
+              ),
+              const SizedBox(height: 12),
+              TextButton.icon(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: Icon(Icons.edit_note, color: neon.accent, size: 20),
+                label: Text('Enter Details Manually',
+                    style: Theme.of(context).textTheme.labelMedium
+                        ?.copyWith(color: neon.accent)),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.shield_outlined, size: 14, color: Colors.white38),
+                  const SizedBox(width: 6),
+                  Text('ON-DEVICE ENCRYPTED SESSION',
+                      style: Theme.of(context).textTheme.labelSmall
+                          ?.copyWith(color: Colors.white38)),
+                ],
               ),
             ],
           ),
@@ -311,4 +371,54 @@ class _CardScannerScreenState extends ConsumerState<CardScannerScreen> {
       ),
     );
   }
+}
+
+/// Draws four neon L-shaped corner brackets around the scan frame.
+class _ScanFramePainter extends CustomPainter {
+  _ScanFramePainter(this.color);
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const arm = 28.0;
+    const inset = 2.0;
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    final w = size.width, h = size.height;
+    // Top-left
+    canvas.drawPath(
+        Path()
+          ..moveTo(inset, inset + arm)
+          ..lineTo(inset, inset)
+          ..lineTo(inset + arm, inset),
+        paint);
+    // Top-right
+    canvas.drawPath(
+        Path()
+          ..moveTo(w - inset - arm, inset)
+          ..lineTo(w - inset, inset)
+          ..lineTo(w - inset, inset + arm),
+        paint);
+    // Bottom-left
+    canvas.drawPath(
+        Path()
+          ..moveTo(inset, h - inset - arm)
+          ..lineTo(inset, h - inset)
+          ..lineTo(inset + arm, h - inset),
+        paint);
+    // Bottom-right
+    canvas.drawPath(
+        Path()
+          ..moveTo(w - inset - arm, h - inset)
+          ..lineTo(w - inset, h - inset)
+          ..lineTo(w - inset, h - inset - arm),
+        paint);
+  }
+
+  @override
+  bool shouldRepaint(_ScanFramePainter oldDelegate) => oldDelegate.color != color;
 }

@@ -8,7 +8,9 @@ import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
 import '../../../core/crypto/crypto_service.dart';
 import '../../../core/services/backup_service.dart';
+import '../../../domain/entities/activity_event.dart';
 import '../../../domain/entities/card_entry.dart';
+import '../../providers/activity_providers.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/card_providers.dart';
 
@@ -108,10 +110,18 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       await file.writeAsBytes(bytes);
 
       try {
-        await Share.shareXFiles(
+        final result = await Share.shareXFiles(
           [XFile(file.path, mimeType: 'application/octet-stream', name: filename)],
           subject: 'OfflinePocket Backup',
         );
+        // Backup export is an egress event — the vault left the device.
+        if (result.status == ShareResultStatus.success) {
+          await ref.read(activityLoggerProvider).log(
+                ActivityType.backupExported,
+                sensitive: true,
+                target: result.raw.isEmpty ? null : result.raw,
+              );
+        }
       } finally {
         if (await file.exists()) await file.delete();
       }
@@ -219,13 +229,19 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         }
       }
 
+      await ref
+          .read(activityLoggerProvider)
+          .log(ActivityType.backupRestored);
+
       if (!mounted) return;
       Navigator.of(context).pop(); // dismiss loading dialog
 
       final msg = skipped == 0
           ? 'Restored $added card${added == 1 ? '' : 's'}'
           : 'Restored $added card${added == 1 ? '' : 's'} · $skipped already on device (skipped)';
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(msg)));
       Navigator.of(context).pop(); // pop BackupScreen
     } catch (e) {
       if (mounted) {
@@ -277,10 +293,28 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
 
   void _showError(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
+    final scheme = Theme.of(context).colorScheme;
+    final messenger = ScaffoldMessenger.of(context);
+    // Repeated taps must replace the current toast, not queue behind it —
+    // otherwise 8 clicks means 8 sequential snackbars.
+    messenger.clearSnackBars();
+    messenger.showSnackBar(
       SnackBar(
-        content: Text(message),
-        backgroundColor: Theme.of(context).colorScheme.error,
+        duration: const Duration(seconds: 3),
+        // The global snackBarTheme styles content in the cyan accent, which
+        // clashes badly on an error surface — override text and border here.
+        content: Text(
+          message,
+          style: Theme.of(context)
+              .textTheme
+              .bodyMedium
+              ?.copyWith(color: scheme.onErrorContainer),
+        ),
+        backgroundColor: scheme.errorContainer,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(color: scheme.error.withValues(alpha: 0.6)),
+        ),
       ),
     );
   }

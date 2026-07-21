@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>offlinePocket - Card Details</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "inverse-surface": "#dbe4e8",
+                "on-primary-container": "#006c71",
+                "secondary-container": "#374a50",
+                "on-surface": "#dbe4e8",
+                "surface-tint": "#00dce5",
+                "secondary": "#b6cad1",
+                "on-error": "#690005",
+                "on-primary-fixed-variant": "#004f53",
+                "primary": "#e9feff",
+                "on-tertiary-fixed-variant": "#3e484d",
+                "surface-variant": "#2e3639",
+                "on-secondary-fixed": "#0b1e24",
+                "surface-container-lowest": "#070f12",
+                "inverse-on-surface": "#2a3235",
+                "surface": "#0d1518",
+                "on-primary-fixed": "#002021",
+                "inverse-primary": "#00696e",
+                "tertiary": "#f3fbff",
+                "primary-fixed-dim": "#00dce5",
+                "surface-container-high": "#232b2e",
+                "on-primary": "#003739",
+                "surface-container-low": "#151d20",
+                "on-secondary-fixed-variant": "#374a50",
+                "error-container": "#93000a",
+                "on-tertiary-fixed": "#131d21",
+                "on-tertiary": "#283236",
+                "outline": "#849495",
+                "tertiary-fixed": "#d9e4e9",
+                "on-tertiary-container": "#586367",
+                "on-secondary": "#213339",
+                "surface-container-highest": "#2e3639",
+                "secondary-fixed": "#d2e6ed",
+                "secondary-fixed-dim": "#b6cad1",
+                "outline-variant": "#3a494a",
+                "on-secondary-container": "#a5b8c0",
+                "primary-container": "#00f5ff",
+                "tertiary-container": "#d4dfe4",
+                "surface-dim": "#0d1518",
+                "on-error-container": "#ffdad6",
+                "surface-container": "#192124",
+                "error": "#ffb4ab",
+                "tertiary-fixed-dim": "#bdc8cd",
+                "surface-bright": "#323a3e",
+                "on-background": "#dbe4e8",
+                "background": "#0d1518",
+                "on-surface-variant": "#b9caca",
+                "primary-fixed": "#63f7ff"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+        },
+        "spacing": {
+                "md": "16px",
+                "2xl": "48px",
+                "margin-mobile": "16px",
+                "xs": "4px",
+                "base": "4px",
+                "lg": "24px",
+                "gutter": "20px",
+                "margin-desktop": "40px",
+                "sm": "8px",
+                "xl": "32px"
+        },
+        "fontFamily": {
+                "headline-lg": ["Geist"],
+                "label-md": ["JetBrains Mono"],
+                "body-md": ["Geist"],
+                "body-lg": ["Geist"],
+                "headline-md": ["Geist"],
+                "label-sm": ["JetBrains Mono"],
+                "headline-lg-mobile": ["Geist"]
+        },
+        "fontSize": {
+                "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "500"}],
+                "headline-lg-mobile": ["26px", {"lineHeight": "32px", "fontWeight": "600"}]
+        }
+      },
+    },
+  }
+</script>
+<style>
+    body {
+        background-color: #0d1518;
+        color: #dbe4e8;
+        -webkit-tap-highlight-color: transparent;
+        font-family: 'Geist', sans-serif;
+    }
+    .glass-panel {
+        background: rgba(25, 33, 36, 0.4);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(132, 148, 149, 0.2);
+    }
+    .cyber-glow {
+        box-shadow: 0 0 16px rgba(0, 220, 229, 0.25);
+    }
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .vault-card-gradient {
+        background: linear-gradient(145deg, #192124 0%, #070f12 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    .vault-card-gradient::after {
+        content: '';
+        position: absolute;
+        top: -20%;
+        right: -10%;
+        width: 60%;
+        height: 60%;
+        background: radial-gradient(circle at center, rgba(0, 220, 229, 0.08) 0%, transparent 70%);
+        pointer-events: none;
+    }
+</style>
+</head>
+<body class="selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top App Bar -->
+<header class="flex justify-between items-center w-full px-margin-mobile h-16 z-50 bg-background/80 backdrop-blur-md sticky top-0 border-b border-outline-variant/30">
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant/50 transition-colors">
+<span class="material-symbols-outlined text-on-surface">arrow_back</span>
+</button>
+<h1 class="text-headline-md font-headline-md text-primary">Card Details</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="w-10 h-10 flex items-center justify-center rounded-full glass-panel cyber-glow transition-all active:scale-95" id="master-toggle">
+<span class="material-symbols-outlined text-primary-container" id="visibility-icon">visibility</span>
+</button>
+</div>
+</header>
+<main class="px-margin-mobile pb-32 max-w-md mx-auto">
+<!-- Brand Styled Card Representation -->
+<section class="mt-lg">
+<div class="vault-card-gradient w-full aspect-[1.586/1] rounded-xl border border-outline/30 p-6 flex flex-col justify-between shadow-2xl relative transition-all duration-500" id="credit-card">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="text-label-sm font-label-sm text-primary-container opacity-90 uppercase">Visa Signature</span>
+<div class="mt-2 w-12 h-9 bg-surface-container rounded border border-outline-variant/40 flex items-center justify-center">
+<!-- Simulating a chip with brand colors -->
+<div class="grid grid-cols-2 gap-px w-8 h-6 bg-primary-container/10 rounded-sm">
+<div class="border-[0.5px] border-outline-variant/20"></div>
+<div class="border-[0.5px] border-outline-variant/20"></div>
+<div class="border-[0.5px] border-outline-variant/20"></div>
+<div class="border-[0.5px] border-outline-variant/20"></div>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-4xl text-primary-container/20" style="font-variation-settings: 'FILL' 1;">contactless</span>
+</div>
+<div class="flex flex-col gap-1">
+<!-- Revealed Numbers Area -->
+<p class="font-label-md text-xl tracking-[0.15em] text-primary selection:bg-transparent" id="card-num-display">
+                        4532 7812 9010 4452
+                    </p>
+<div class="flex gap-4 mt-2">
+<div class="flex flex-col">
+<span class="text-[10px] font-label-sm text-on-surface-variant uppercase tracking-wider">Expires</span>
+<span class="font-label-md text-sm text-on-surface" id="expiry-display">12/28</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-label-sm text-on-surface-variant uppercase tracking-wider">CVV</span>
+<span class="font-label-md text-sm text-on-surface" id="cvv-display">882</span>
+</div>
+</div>
+</div>
+<div class="flex justify-between items-end">
+<span class="text-body-md font-body-md text-on-surface font-medium uppercase tracking-wider">Alex Sterling</span>
+<div class="italic font-bold text-2xl text-on-surface/10">VISA</div>
+</div>
+</div>
+</section>
+<!-- Detail List -->
+<section class="mt-xl space-y-gutter">
+<!-- Full Name -->
+<div class="p-md rounded-xl bg-surface-container-low border border-outline/20 flex flex-col gap-1">
+<label class="text-label-sm font-label-sm text-on-surface-variant uppercase">Full Name</label>
+<div class="flex justify-between items-center">
+<span class="text-headline-md font-headline-md text-on-surface">Alex Sterling</span>
+</div>
+</div>
+<!-- Card Number -->
+<div class="p-md rounded-xl bg-surface-container-low border border-outline/20 flex flex-col gap-1">
+<label class="text-label-sm font-label-sm text-on-surface-variant uppercase">Card Number</label>
+<div class="flex justify-between items-center">
+<span class="font-label-md text-body-md text-primary-fixed-dim tracking-wider" id="raw-card-number">4532 7812 9010 4452</span>
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-primary-container/20 text-primary-container bg-primary-container/5 hover:bg-primary-container/10 transition-colors" onclick="copyToClipboard('4532781290104452')">
+<span class="material-symbols-outlined text-[18px]">content_copy</span>
+<span class="text-label-sm font-label-sm">Copy</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-gutter">
+<!-- Expiry Date -->
+<div class="p-md rounded-xl bg-surface-container-low border border-outline/20 flex flex-col gap-1">
+<label class="text-label-sm font-label-sm text-on-surface-variant uppercase">Expiry Date</label>
+<span class="font-label-md text-body-md text-on-surface">12/28</span>
+</div>
+<!-- CVV -->
+<div class="p-md rounded-xl bg-surface-container-low border border-outline/20 flex flex-col gap-1 relative overflow-hidden">
+<label class="text-label-sm font-label-sm text-on-surface-variant uppercase">CVV</label>
+<span class="font-label-md text-body-md text-on-surface" id="cvv-value">882</span>
+<div class="absolute inset-0 bg-surface-container-low flex items-center px-md pt-6 hidden" id="cvv-mask">
+<span class="text-on-surface-variant opacity-50">•••</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Actions -->
+<section class="mt-xl flex flex-col gap-4">
+<button class="w-full h-14 flex items-center justify-center gap-2 border border-error/30 rounded-xl text-headline-md font-headline-md text-error hover:bg-error/5 transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined">delete_forever</span>
+<span class="text-body-lg font-headline-md">Delete Card</span>
+</button>
+</section>
+</main>
+<!-- Secure Clipboard Banner -->
+<div class="fixed bottom-lg left-margin-mobile right-margin-mobile z-[60] translate-y-32 transition-transform duration-500 ease-out" id="clipboard-toast">
+<div class="glass-panel rounded-xl p-md flex items-center justify-between border-primary-container/30 cyber-glow">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-container/20 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[20px]">shield</span>
+</div>
+<div class="flex flex-col">
+<span class="text-label-sm font-label-sm text-primary-container uppercase">Secure Clipboard</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Clear in <span class="" id="timer">45</span>s</span>
+</div>
+</div>
+<div class="w-10 h-10 relative flex items-center justify-center">
+<svg class="w-full h-full -rotate-90">
+<circle class="text-outline-variant/30" cx="20" cy="20" fill="transparent" r="16" stroke="currentColor" stroke-width="2"></circle>
+<circle class="text-primary-container transition-all duration-1000 linear" cx="20" cy="20" fill="transparent" id="timer-progress" r="16" stroke="currentColor" stroke-dasharray="100.5" stroke-dashoffset="0" stroke-width="2"></circle>
+</svg>
+</div>
+</div>
+</div>
+<script>
+        let isRevealed = true;
+        const masterToggle = document.getElementById('master-toggle');
+        const visibilityIcon = document.getElementById('visibility-icon');
+        const cardNumDisplay = document.getElementById('card-num-display');
+        const expiryDisplay = document.getElementById('expiry-display');
+        const cvvDisplay = document.getElementById('cvv-display');
+        const cvvMask = document.getElementById('cvv-mask');
+        const rawCardNum = document.getElementById('raw-card-number');
+
+        const FULL_CARD = "4532 7812 9010 4452";
+        const MASKED_CARD = "•••• •••• •••• 4452";
+        const FULL_EXP = "12/28";
+        const MASKED_EXP = "••/••";
+        const FULL_CVV = "882";
+        const MASKED_CVV = "•••";
+
+        masterToggle.addEventListener('click', () => {
+            isRevealed = !isRevealed;
+            
+            if (isRevealed) {
+                visibilityIcon.innerText = 'visibility';
+                cardNumDisplay.innerText = FULL_CARD;
+                expiryDisplay.innerText = FULL_EXP;
+                cvvDisplay.innerText = FULL_CVV;
+                rawCardNum.innerText = FULL_CARD;
+                cvvMask.classList.add('hidden');
+                masterToggle.classList.add('cyber-glow');
+            } else {
+                visibilityIcon.innerText = 'visibility_off';
+                cardNumDisplay.innerText = MASKED_CARD;
+                expiryDisplay.innerText = MASKED_EXP;
+                cvvDisplay.innerText = MASKED_CVV;
+                rawCardNum.innerText = MASKED_CARD;
+                cvvMask.classList.remove('hidden');
+                masterToggle.classList.remove('cyber-glow');
+            }
+        });
+
+        // Clipboard Logic
+        let timerInterval;
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showClipboardToast();
+            });
+        }
+
+        function showClipboardToast() {
+            const toast = document.getElementById('clipboard-toast');
+            const timerSpan = document.getElementById('timer');
+            const progress = document.getElementById('timer-progress');
+            
+            clearInterval(timerInterval);
+            toast.classList.remove('translate-y-32');
+            
+            let timeLeft = 45;
+            timerSpan.innerText = timeLeft;
+            progress.style.strokeDashoffset = 0;
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerSpan.innerText = timeLeft;
+                
+                // Update circle progress (circumference is ~100.5)
+                const offset = 100.5 - (timeLeft / 45) * 100.5;
+                progress.style.strokeDashoffset = offset;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    toast.classList.add('translate-y-32');
+                }
+            }, 1000);
+        }
+    </script>
+</body></html>

@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/config/app_config.dart';
 import '../screens/auth/auth_gate.dart';
-import '../screens/home/home_screen.dart';
+import '../screens/home/main_shell.dart';
 import '../screens/onboarding/onboarding_screen.dart';
 import 'auth_provider.dart';
 
@@ -47,7 +47,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: '/auth', builder: (context, _) => const AuthGate()),
       GoRoute(path: '/onboarding', builder: (context, _) => const OnboardingScreen()),
-      GoRoute(path: '/home', builder: (context, _) => const HomeScreen()),
+      GoRoute(path: '/home', builder: (context, _) => const MainShell()),
     ],
   );
 });
