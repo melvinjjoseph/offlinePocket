@@ -28,6 +28,8 @@ A security-first, **offline-only** digital wallet for Android. Store cards and i
 
 **Themes** — Dark, light, or follow system.
 
+**Guided tour** — A six-slide walkthrough of the security model on first launch, replayable any time from **Settings → How OfflinePocket Works**.
+
 ### Supported categories
 
 Credit Card · Debit Card · Prepaid Card · Passport · Driving Licence · National ID · Generic ID

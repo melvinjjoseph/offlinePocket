@@ -4,6 +4,32 @@ Tracks features built, bugs fixed, and decisions made across versions.
 
 ---
 
+## v3.1.0 — Onboarding rebuild
+
+### Six-slide carousel
+`onboarding_screen.dart` was rewritten against a second set of Stitch mockups (`Design/onboarding_*`). The old version was four text-and-circle-icon slides; the new one is six purpose-built visuals: Your Private Vault, Intelligent Scanning, True Privacy, Local Activity Log, Encrypted Backups, Secure Your Pocket.
+
+The slides share `_SlideScaffold` (visual → mono badge → title → body → feature chips) so vertical rhythm stays identical while each hero visual is bespoke. Every slide is scrollable inside a `ConstrainedBox(minHeight: viewport)`, which keeps the content optically centred on tall devices without clipping on short ones.
+
+Visuals are drawn, not shipped as images — the animated scan line on the Scanning slide, the terminal window on the Activity Log slide, and two `CustomPainter`s (`_DotGridPainter` for the background grid, `_DashedRRectPainter` for the dashed frames). Nothing new was added to `assets/`.
+
+Colors come from `context.neon` and `ColorScheme` throughout, so the carousel renders correctly in the light theme too.
+
+### Version badge reads the real version
+The mockup hardcodes `V1.0.4 SECURE NODE`. It now reads `PackageInfo.version`, so the badge can't drift out of sync with the shipped build.
+
+### Replay from Settings
+New **ABOUT → How OfflinePocket Works** action card. It clears `onboardingSeenProvider` and routes to `/onboarding`; finishing the tour re-sets the flag and the router's redirect returns to `/home`. Previously the carousel was reachable only by an app-version bump.
+
+### Two rendering constraints worth recording
+- The audit-log meta line drops to 10sp with ellipsis guards. At the theme's 12sp JetBrains Mono, the longest pair (`TIMESTAMP: 12:48:33.450` + `SYNC: LOCAL_ONLY`) overflows on narrow devices.
+- The `SHA-256:` sub-line is upright, not italic. Only the 400/500 uprights of JetBrains Mono are bundled, so an italic request renders upright regardless; reduced alpha carries the distinction instead.
+
+### Settings header logo
+The Settings tab drew `Icons.shield_outlined` directly while every other header used `assets/icon/logo.png`, so the app appeared to have two different marks. All headers now share the asset at 32×32, with the shield as an `errorBuilder` fallback.
+
+---
+
 ## v3.0.0 — Redesign
 
 ### Visual system

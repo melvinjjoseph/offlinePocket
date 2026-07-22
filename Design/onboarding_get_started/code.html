@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Secure Your Pocket - Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;family=JetBrains+Mono:wght@100..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#f3fbff",
+                    "primary-fixed-dim": "#00dce5",
+                    "secondary-fixed-dim": "#b6cad1",
+                    "on-secondary-fixed-variant": "#374a50",
+                    "on-tertiary-fixed-variant": "#3e484d",
+                    "primary-container": "#00f5ff",
+                    "on-surface": "#dbe4e8",
+                    "on-primary": "#003739",
+                    "error-container": "#93000a",
+                    "inverse-on-surface": "#2a3235",
+                    "primary": "#e9feff",
+                    "on-error": "#690005",
+                    "surface-variant": "#2e3639",
+                    "on-error-container": "#ffdad6",
+                    "secondary-fixed": "#d2e6ed",
+                    "on-secondary-container": "#a5b8c0",
+                    "surface-bright": "#323a3e",
+                    "outline-variant": "#3a494a",
+                    "on-tertiary-fixed": "#131d21",
+                    "on-secondary": "#213339",
+                    "inverse-surface": "#dbe4e8",
+                    "surface-container-low": "#151d20",
+                    "secondary-container": "#374a50",
+                    "secondary": "#b6cad1",
+                    "on-surface-variant": "#b9caca",
+                    "tertiary-fixed-dim": "#bdc8cd",
+                    "surface-tint": "#00dce5",
+                    "primary-fixed": "#63f7ff",
+                    "on-background": "#dbe4e8",
+                    "surface": "#0d1518",
+                    "inverse-primary": "#00696e",
+                    "on-primary-fixed": "#002021",
+                    "tertiary-container": "#d4dfe4",
+                    "tertiary-fixed": "#d9e4e9",
+                    "outline": "#849495",
+                    "on-primary-fixed-variant": "#004f53",
+                    "error": "#ffb4ab",
+                    "background": "#0d1518",
+                    "surface-container-lowest": "#070f12",
+                    "on-tertiary-container": "#586367",
+                    "on-tertiary": "#283236",
+                    "surface-container": "#192124",
+                    "on-primary-container": "#006c71",
+                    "surface-container-high": "#232b2e",
+                    "surface-container-highest": "#2e3639",
+                    "on-secondary-fixed": "#0b1e24",
+                    "surface-dim": "#0d1518"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "md": "16px",
+                    "xl": "32px",
+                    "margin-mobile": "16px",
+                    "xs": "4px",
+                    "lg": "24px",
+                    "2xl": "48px",
+                    "sm": "8px",
+                    "base": "4px",
+                    "margin-desktop": "40px",
+                    "gutter": "20px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Geist"],
+                    "headline-lg-mobile": ["Geist"],
+                    "headline-md": ["Geist"],
+                    "body-lg": ["Geist"],
+                    "label-sm": ["JetBrains Mono"],
+                    "label-md": ["JetBrains Mono"],
+                    "body-md": ["Geist"]
+            },
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "500"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0d1518;
+            color: #dbe4e8;
+            overflow: hidden;
+        }
+        .vault-gradient {
+            background: linear-gradient(135deg, #2c3e44 0%, #1a2428 100%);
+        }
+        .glow-cyan {
+            box-shadow: 0px 0px 12px #00f5ff33;
+        }
+        .glow-cyan-strong:active {
+            box-shadow: 0px 0px 20px #00f5ff66;
+        }
+        .inner-etch {
+            box-shadow: inset 0px 1px 3px rgba(0, 0, 0, 0.4);
+        }
+        .watermark-logo {
+            opacity: 0.05;
+            filter: grayscale(1) brightness(2);
+            pointer-events: none;
+        }
+        .pulse-fill {
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; filter: brightness(1.2); }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen font-body-md text-body-md antialiased">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface dark:bg-surface flex items-center justify-between px-margin-mobile h-16">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container dark:text-primary-container" data-icon="security">security</span>
+<h1 class="font-headline-md text-headline-md-mobile text-primary-fixed-dim tracking-tighter">offlinePocket</h1>
+</div>
+<button class="text-on-surface-variant font-label-md text-label-md hover:opacity-80 transition-opacity active:scale-95 transition-transform">
+            Skip
+        </button>
+</header>
+<!-- Main Canvas -->
+<main class="flex-grow flex flex-col items-center justify-center relative px-margin-mobile pt-16 pb-32 overflow-hidden">
+<!-- Watermark Background -->
+<div class="absolute inset-0 flex items-center justify-center overflow-hidden">
+<img alt="" class="watermark-logo w-96 h-96 scale-150 rotate-12" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8po1GWeupY6ugTTFNJWALculbejjL7znXDbKXdqbk_FZF_fR2ZDREUtClGoJ2xSB041HHpqwipyyfV0lOmAF6Zdhq1bSVPmFBZkejU1_zogHKLXpVhpdU1WUDS6lw6oQOHTOZ2SB1ULA53HBSbSwTdZLARgY2874ploCHdfcnr013MzNlthdgv9NCL6KSy8js8QXgzYQU4nOt9BW-eTleTNp-yx6MvZbBN9nLf7NQvdKFNVvZR2VZQ1MqnsRnTJDKOiOqCtD9tt0"/>
+</div>
+<!-- Atmospheric Elements (Decorative) -->
+<div class="absolute top-1/4 left-1/4 w-64 h-64 bg-primary-container/5 rounded-full blur-[100px]"></div>
+<div class="absolute bottom-1/4 right-1/4 w-64 h-64 bg-primary-container/5 rounded-full blur-[100px]"></div>
+<!-- Central Shield Graphic (Interactive Placeholder) -->
+<div class="relative z-10 mb-xl">
+<div class="w-48 h-48 vault-gradient border border-[#ffffff15] rounded-full flex items-center justify-center relative glow-cyan">
+<!-- Inner Processing Ring -->
+<div class="absolute inset-2 border-2 border-dashed border-primary-container/20 rounded-full animate-[spin_10s_linear_infinite]"></div>
+<!-- Shield Icon -->
+<div class="flex flex-col items-center gap-2">
+<span class="material-symbols-outlined text-[64px] text-primary-container" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<div class="px-3 py-1 bg-primary-container/10 border border-primary-container/20 rounded-full">
+<span class="font-label-sm text-label-sm text-primary-container uppercase tracking-widest">Encrypted</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Text Content -->
+<div class="relative z-10 text-center max-w-md">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-primary-fixed-dim mb-md">
+                Secure Your Pocket
+            </h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-xl leading-relaxed">
+                Ready to digitize your sensitive documents with military-grade protection. Your data never leaves this device.
+            </p>
+</div>
+<!-- Success Progress Bar (Micro-interaction) -->
+<div class="relative z-10 w-full max-w-xs h-1 bg-surface-container rounded-full overflow-hidden mb-2xl">
+<div class="absolute inset-y-0 left-0 bg-primary-container w-full pulse-fill"></div>
+</div>
+<!-- Primary CTA -->
+<div class="relative z-10 w-full max-w-xs">
+<button class="w-full h-14 bg-primary-container text-on-primary font-label-md text-label-md rounded-lg flex items-center justify-center gap-2 glow-cyan hover:brightness-110 active:scale-95 transition-all" onclick="handleStart()">
+                Get Started
+                <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</main>
+<!-- Bottom Navigation Shell (Dots & Logic) -->
+<nav class="fixed bottom-0 w-full z-50 pb-xl bg-transparent flex justify-between items-center px-margin-mobile">
+<!-- Pagination Dots -->
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-outline-variant"></div>
+<div class="w-2 h-2 rounded-full bg-outline-variant"></div>
+<div class="w-2 h-2 rounded-full bg-outline-variant"></div>
+<div class="w-10 h-2 rounded-full bg-primary-container shadow-[0px_0px_12px_#00f5ff33]"></div>
+</div>
+<!-- Navigation Icon Buttons -->
+<div class="flex items-center gap-sm">
+<button class="text-outline-variant p-2 hover:text-primary-fixed-dim transition-colors active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" data-icon="fiber_manual_record">fiber_manual_record</span>
+</button>
+<button class="bg-primary-container text-on-primary-container rounded-full p-4 shadow-[0px_0px_12px_#00f5ff33] active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</nav>
+<!-- UI Interaction Scripts -->
+<script>
+        function handleStart() {
+            // Visual feedback for interaction
+            const btn = event.currentTarget;
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin" data-icon="sync">sync</span> Initializing Vault...';
+            
+            setTimeout(() => {
+                btn.innerHTML = '<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span> Vault Ready';
+                btn.classList.replace('bg-primary-container', 'bg-green-500');
+                btn.classList.replace('text-on-primary', 'text-white');
+            }, 1000);
+        }
+
+        // Parallax effect for the watermark logo
+        document.addEventListener('mousemove', (e) => {
+            const watermark = document.querySelector('.watermark-logo');
+            if (watermark) {
+                const moveX = (e.clientX - window.innerWidth / 2) * 0.01;
+                const moveY = (e.clientY - window.innerHeight / 2) * 0.01;
+                watermark.style.transform = `translate(${moveX}px, ${moveY}px) scale(1.5) rotate(12deg)`;
+            }
+        });
+    </script>
+</body></html>

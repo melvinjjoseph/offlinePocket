@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../domain/entities/activity_event.dart';
 import '../../providers/activity_providers.dart';
+import '../../providers/app_providers.dart';
 import '../../providers/card_providers.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/theme_provider.dart';
@@ -35,7 +37,11 @@ class SettingsTab extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                Icon(Icons.shield_outlined, color: neon.accent, size: 26),
+                Image.asset('assets/icon/logo.png',
+                    width: 32,
+                    height: 32,
+                    errorBuilder: (_, _, _) => Icon(Icons.shield_outlined,
+                        color: neon.accent, size: 26)),
                 const SizedBox(width: 10),
                 Text('OfflinePocket',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -125,6 +131,19 @@ class SettingsTab extends ConsumerWidget {
                         .read(activityLoggingEnabledProvider.notifier)
                         .setEnabled(v),
                   ),
+                ),
+                const SizedBox(height: 24),
+                _sectionLabel(context, 'ABOUT'),
+                const SizedBox(height: 12),
+                _ActionCard(
+                  title: 'How OfflinePocket Works',
+                  icon: Icons.info_outline,
+                  onTap: () {
+                    // Clearing the flag lets the router serve /onboarding
+                    // again; the tour re-sets it when it finishes.
+                    ref.read(onboardingSeenProvider.notifier).state = false;
+                    context.go('/onboarding');
+                  },
                 ),
                 const SizedBox(height: 24),
                 _sectionLabel(context, 'VAULT MAINTENANCE'),

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>offlinePocket - Portable Security</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#00dce5",
+                        "on-tertiary-fixed-variant": "#3e484d",
+                        "on-primary-fixed": "#002021",
+                        "surface-variant": "#2e3639",
+                        "surface-container-high": "#232b2e",
+                        "primary-fixed": "#63f7ff",
+                        "on-tertiary-fixed": "#131d21",
+                        "error-container": "#93000a",
+                        "outline-variant": "#3a494a",
+                        "surface": "#0d1518",
+                        "on-primary-fixed-variant": "#004f53",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed": "#d2e6ed",
+                        "on-primary-container": "#006c71",
+                        "surface-container-lowest": "#070f12",
+                        "on-secondary-fixed-variant": "#374a50",
+                        "surface-container": "#192124",
+                        "on-tertiary-container": "#586367",
+                        "secondary": "#b6cad1",
+                        "primary-container": "#00f5ff",
+                        "inverse-surface": "#dbe4e8",
+                        "on-error": "#690005",
+                        "tertiary": "#f3fbff",
+                        "on-tertiary": "#283236",
+                        "on-surface-variant": "#b9caca",
+                        "on-background": "#dbe4e8",
+                        "secondary-fixed-dim": "#b6cad1",
+                        "surface-bright": "#323a3e",
+                        "surface-container-low": "#151d20",
+                        "secondary-container": "#374a50",
+                        "inverse-on-surface": "#2a3235",
+                        "inverse-primary": "#00696e",
+                        "on-primary": "#003739",
+                        "error": "#ffb4ab",
+                        "on-secondary": "#213339",
+                        "background": "#0d1518",
+                        "tertiary-container": "#d4dfe4",
+                        "outline": "#849495",
+                        "tertiary-fixed": "#d9e4e9",
+                        "surface-dim": "#0d1518",
+                        "on-surface": "#dbe4e8",
+                        "on-secondary-container": "#a5b8c0",
+                        "tertiary-fixed-dim": "#bdc8cd",
+                        "primary": "#e9feff",
+                        "on-secondary-fixed": "#0b1e24",
+                        "surface-container-highest": "#2e3639",
+                        "surface-tint": "#00dce5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "gutter": "20px",
+                        "xl": "32px",
+                        "margin-mobile": "16px",
+                        "md": "16px",
+                        "xs": "4px",
+                        "margin-desktop": "40px",
+                        "sm": "8px",
+                        "base": "4px",
+                        "2xl": "48px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Geist"],
+                        "label-md": ["JetBrains Mono"],
+                        "body-lg": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "headline-lg-mobile": ["Geist"],
+                        "body-md": ["Geist"],
+                        "label-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["26px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .security-glow {
+            box-shadow: 0px 0px 12px #00f5ff33;
+        }
+        .vault-gradient {
+            background: linear-gradient(135deg, #2c3e44 0%, #1a2428 100%);
+        }
+        @keyframes pulse-cyan {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+        .animate-pulse-cyan {
+            animation: pulse-cyan 3s infinite ease-in-out;
+        }
+        @keyframes drift {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .animate-drift {
+            animation: drift 6s infinite ease-in-out;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-container selection:text-on-primary-container overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 w-full z-50 bg-surface dark:bg-surface flex items-center justify-between px-margin-mobile h-16">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">security</span>
+<h1 class="font-headline-md text-headline-md-mobile text-primary-fixed-dim tracking-tighter">offlinePocket</h1>
+</div>
+<button class="text-on-surface-variant font-label-md text-label-md hover:opacity-80 transition-opacity active:scale-95 transition-transform uppercase tracking-widest">
+            Skip
+        </button>
+</header>
+<main class="flex-1 flex flex-col items-center justify-center px-margin-mobile pt-16 pb-32 max-w-lg mx-auto text-center">
+<!-- Portable Security Visual Anchor -->
+<div class="relative w-full aspect-square flex items-center justify-center mb-12">
+<!-- Background Glow -->
+<div class="absolute w-64 h-64 bg-primary-container opacity-5 blur-[80px] rounded-full animate-pulse-cyan"></div>
+<!-- Central Shielding Concept -->
+<div class="relative z-10 w-full max-w-[280px] animate-drift">
+<div class="vault-gradient border border-outline-variant rounded-xl p-lg security-glow relative overflow-hidden">
+<!-- Tech Detail Overlay -->
+<div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#00f5ff 0.5px, transparent 0.5px); background-size: 16px 16px;"></div>
+<div class="relative z-10 flex flex-col items-center">
+<div class="mb-lg p-md bg-primary-container/10 rounded-full border border-primary-container/20">
+<span class="material-symbols-outlined text-primary-container text-5xl" style="font-variation-settings: 'FILL' 1;">enhanced_encryption</span>
+</div>
+<div class="w-full bg-surface-container-low rounded-lg p-md border border-white/5 mb-sm">
+<div class="flex items-center justify-between gap-md">
+<span class="material-symbols-outlined text-on-surface-variant" style="font-variation-settings: 'FILL' 0;">description</span>
+<div class="h-1 flex-1 bg-outline-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[75%] animate-pulse"></div>
+</div>
+<span class="font-label-sm text-label-sm text-primary-fixed-dim">AES-256</span>
+</div>
+</div>
+<div class="font-label-sm text-label-sm text-outline tracking-wider flex items-center gap-xs">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">lock</span>
+                            PORTABLE_VAULT.OPBACKUP
+                        </div>
+</div>
+</div>
+<!-- Side Device Indicators -->
+<div class="absolute -left-8 top-1/2 -translate-y-1/2 opacity-20 hidden md:block">
+<span class="material-symbols-outlined text-4xl">smartphone</span>
+</div>
+<div class="absolute -right-8 top-1/2 -translate-y-1/2 opacity-20 hidden md:block">
+<span class="material-symbols-outlined text-4xl">cloud_queue</span>
+</div>
+</div>
+</div>
+<!-- Content Stack -->
+<div class="space-y-md">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-primary-fixed leading-tight">Encrypted Backups</h2>
+<p class="font-body-md text-on-surface-variant leading-relaxed">
+                Export secure backups that never touch our servers. Your vault remains opaque without your password, even when stored in the cloud.
+            </p>
+<div class="pt-sm">
+<p class="font-body-md text-on-surface/70 text-sm italic">
+                    "Export a secure .opbackup file protected by AES-256-GCM. Share it anywhere or save it to your preferred cloud storage—your data stays encrypted with your master password."
+                </p>
+</div>
+</div>
+</main>
+<!-- BottomNavBar Shell -->
+<footer class="fixed bottom-0 w-full z-50 pb-xl bg-transparent flex justify-between items-center px-margin-mobile">
+<!-- Progress Dots (Step 4 of 5) -->
+<div class="flex gap-2 items-center">
+<div class="w-2 h-2 rounded-full bg-outline-variant"></div>
+<div class="w-2 h-2 rounded-full bg-outline-variant"></div>
+<div class="w-2 h-2 rounded-full bg-outline-variant"></div>
+<div class="w-8 h-2 rounded-full bg-primary-container security-glow"></div>
+<div class="w-2 h-2 rounded-full bg-outline-variant"></div>
+</div>
+<!-- Navigation Actions -->
+<div class="flex items-center gap-md">
+<button class="text-outline-variant p-2 hover:text-primary-fixed-dim transition-colors active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined text-3xl">fiber_manual_record</span>
+</button>
+<button class="bg-primary-container text-on-primary-container rounded-full p-4 shadow-[0px_0px_12px_#00f5ff33] hover:opacity-80 transition-opacity active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined text-3xl font-bold">arrow_forward</span>
+</button>
+</div>
+</footer>
+<!-- Background Atmospheric Elements -->
+<div class="fixed inset-0 pointer-events-none z-[-1] overflow-hidden">
+<!-- Radial Gradient for Depth -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,_#1a2428_0%,_#0d1518_100%)]"></div>
+<!-- Scanlines effect -->
+<div class="absolute inset-0 opacity-[0.03]" style="background: linear-gradient(rgba(0, 245, 255, 0.1) 50%, transparent 50%); background-size: 100% 4px;"></div>
+<!-- Micro-glow particles -->
+<div class="absolute top-1/4 left-1/4 w-1 h-1 bg-primary-container rounded-full animate-pulse blur-[1px]"></div>
+<div class="absolute bottom-1/3 right-1/4 w-1.5 h-1.5 bg-primary-container/40 rounded-full animate-pulse delay-700 blur-[1.5px]"></div>
+</div>
+<script>
+        // Micro-interaction for the "Next" button
+        document.querySelector('button.bg-primary-container').addEventListener('click', function() {
+            // Add a brief intensity to the glow on click
+            this.style.boxShadow = '0px 0px 24px #00f5ff88';
+            setTimeout(() => {
+                this.style.boxShadow = '0px 0px 12px #00f5ff33';
+            }, 300);
+        });
+
+        // Subtle parallax on mouse move (Desktop only)
+        if (window.innerWidth > 768) {
+            document.addEventListener('mousemove', (e) => {
+                const moveX = (e.clientX - window.innerWidth / 2) / 50;
+                const moveY = (e.clientY - window.innerHeight / 2) / 50;
+                const visual = document.querySelector('.animate-drift');
+                if (visual) {
+                    visual.style.transform = `translate(${moveX}px, ${moveY}px)`;
+                }
+            });
+        }
+    </script>
+</body></html>

@@ -1,7 +1,7 @@
 name: offline_pocket
 description: "Offline-first, encrypted digital wallet for physical cards and IDs."
 publish_to: 'none'
-version: 3.0.0+2
+version: 3.1.0+3
 
 environment:
   sdk: ^3.12.2
